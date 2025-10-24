@@ -22,6 +22,13 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 });
 Route::middleware(['auth', 'role:taxpayer'])->group(function () {
     Route::get('/taxpayer/dashboard', [TaxpayerController::class, 'index'])->name('taxpayer.dashboard');
+    Route::get('/taxpayer/summary', [TaxpayerController::class, 'summary'])->name('taxpayer.summary');
+    Route::get('/taxpayer/payment', [TaxpayerController::class, 'paymentForm'])->name('taxpayer.payment');
+    Route::post('/taxpayer/payment', [TaxpayerController::class, 'processPayment'])->name('taxpayer.payment.process');
+    Route::get('/taxpayer/complaints', [TaxpayerController::class, 'complaints'])->name('taxpayer.complaints');
+    Route::post('/taxpayer/complaints', [TaxpayerController::class, 'submitComplaint'])->name('taxpayer.complaints.submit');
+    Route::get('/taxpayer/news', [TaxpayerController::class, 'news'])->name('taxpayer.news');
+    Route::post('/taxpayer/news/{newsId}/comments', [TaxpayerController::class, 'submitComment'])->name('taxpayer.news.comment');
 });
 Route::middleware(['auth', 'role:interviewer'])->group(function () {
     Route::get('/interviewer/dashboard', [InterviewerController::class, 'index'])->name('interviewer.dashboard');
@@ -31,3 +38,4 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 require __DIR__.'/auth.php';
+
