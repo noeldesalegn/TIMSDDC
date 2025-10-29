@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -45,9 +46,14 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-    public function taxSummaries()
-{
-    return $this->hasMany(TaxSummary::class, 'taxpayer_id');
-}
 
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    public function complaints()
+    {
+        return $this->hasMany(Complaint::class);
+    }
 }

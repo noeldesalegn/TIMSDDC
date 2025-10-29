@@ -34,6 +34,17 @@ Route::middleware(['auth', 'role:interviewer'])->group(function () {
     Route::get('/interviewer/dashboard', [InterviewerController::class, 'index'])->name('interviewer.dashboard');
 });
 Route::get('/dashboard', function () {
+    $user = auth()->user();
+    
+    // Redirect based on role
+    if ($user->role === 'admin') {
+        return redirect()->route('admin.dashboard');
+    } elseif ($user->role === 'taxpayer') {
+        return redirect()->route('taxpayer.dashboard');
+    } elseif ($user->role === 'interviewer') {
+        return redirect()->route('interviewer.dashboard');
+    }
+    
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 

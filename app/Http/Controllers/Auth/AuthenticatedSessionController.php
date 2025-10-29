@@ -28,16 +28,19 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        if (auth()->user()->role === 'admin') {
-          return redirect()->route('admin.dashboard');
-        } elseif (auth()->user()->role === 'taxpayer') {
+        $user = auth()->user();
+        
+        // Redirect based on role
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        } elseif ($user->role === 'taxpayer') {
             return redirect()->route('taxpayer.dashboard');
-        } elseif (auth()->user()->role === 'interviewer') {
+        } elseif ($user->role === 'interviewer') {
             return redirect()->route('interviewer.dashboard');
         } else {
-            return redirect('/'); // fallback
+            // Fallback to generic dashboard for unassigned roles
+            return redirect(route('dashboard', absolute: false));
         }
-
     }
 
     /**
