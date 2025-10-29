@@ -13,8 +13,21 @@ return new class extends Migration
     {
         Schema::create('tax_summaries', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('taxpayer_id')->constrained('users')->onDelete('cascade');
+            $table->enum('tax_type', [
+                'Employment',
+                'Business',
+                'Rental',
+            ]);
+            $table->enum('category', ['A', 'B', 'C'])->nullable();
+            $table->decimal('taxable_income', 15, 2)->default(0);
+            $table->decimal('tax_rate', 5, 2)->default(0);
+            $table->decimal('deductible', 15, 2)->default(0);
+            $table->decimal('tax_amount', 15, 2)->default(0);
+            $table->string('tax_period')->nullable();
+            $table->enum('status', ['pending', 'paid', 'overdue'])->default('pending');
             $table->timestamps();
-        });
+            });
     }
 
     /**
