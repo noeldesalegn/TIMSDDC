@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Models\News;
 use App\Models\Complaint;
+use App\Models\Payment;
+use App\Models\TaxSummary;
+use Carbon\Carbon;
 
 class TaxpayerController extends Controller
 {
@@ -57,8 +60,67 @@ class TaxpayerController extends Controller
 
     public function summary()
     {
-        $summary = $this->calculateSummary();
-        return view('taxpayer.summary', $summary);
+        $user = auth()->user();
+
+        // Fetch or calculate the taxpayer's tax summary
+        $taxSummary = TaxSummary::where('taxpayer_id', $user->id)
+            ->latest()
+            ->first();
+
+        // If not found, create a new default summary (for demo)
+        if (!$taxSummary) {
+            // Example: Replace with real income data input later
+            $annualIncome = 200000; // Example — this could be entered by the taxpayer
+            $category = 'Business'; // Business / Employment / Rental
+
+            // Tax rates
+            $rates = [
+                'Employment' => 0.10,
+                'Business'   => 0.15,
+                'Rental'     => 0.05,
+            ];
+
+            $taxRate = $rates[$category];
+            $taxAmount = $annualIncome * $taxRate;
+
+            $taxSummary = TaxSummary::create([
+                'taxpayer_id' => $user->id,
+                'tax_type' => $category,
+                'category' => 'B', // Category A/B/C classification
+                'taxable_income' => $annualIncome,
+                'tax_rate' => $taxRate,
+                'tax_amount' => $taxAmount,
+                'tax_period' => now()->format('Y-m'),
+                'status' => 'pending',
+            ]);
+        }
+
+        // Now compute the display breakdown
+        $breakdown = [
+            [
+                'category' => 'Employment Income',
+                'amount' => 120000,
+                'rate' => 0.10,
+                'tax' => 120000 * 0.10,
+            ],
+            [
+                'category' => 'Business Income',
+                'amount' => 60000,
+                'rate' => 0.15,
+                'tax' => 60000 * 0.15,
+            ],
+            [
+                'category' => 'Rental Income',
+                'amount' => 20000,
+                'rate' => 0.05,
+                'tax' => 20000 * 0.05,
+            ],
+        ];
+
+        $total_tax = collect($breakdown)->sum('tax');
+        $due_date = Carbon::now()->addDays(30);
+
+        return view('taxpayer.summary', compact('breakdown', 'total_tax', 'due_date'));
     }
 
     public function paymentForm(Request $request)
@@ -73,27 +135,49 @@ class TaxpayerController extends Controller
     public function processPayment(Request $request)
     {
         $data = $request->validate([
-            'tin' => ['required','string','min:6','max:32'],
-            'bank_name' => ['required','string','max:100'],
-            'account_number' => ['required','string','max:34'],
-            'amount' => ['required','numeric','min:0'],
-        ]);
+        'tin' => ['required','string','min:6','max:32'],
+        'bank_name' => ['required','string','max:100'],
+        'account_number' => ['required','string','max:34'],
+        'amount' => ['required','numeric','min:0'],
+    ]);
 
-        $receipt = [
-            'reference' => strtoupper(Str::random(10)),
-            'tin' => $data['tin'],
-            'bank_name' => $data['bank_name'],
-            'account_number' => $data['account_number'],
-            'amount' => (float) $data['amount'],
-            'paid_at' => now()->toDateTimeString(),
-        ];
+    $user = auth()->user();
+    $summary = $this->calculateSummary();
 
-        // Store last payment in session as a placeholder (no DB persistence yet)
-        $request->session()->put('taxpayer_last_payment', $receipt);
+    // Create a payment record
+    $payment = Payment::create([
+        'user_id' => $user->id,
+        'amount' => $data['amount'],
+        'status' => 'completed',
+        'reference' => strtoupper(Str::random(10)),
+        'notes' => 'Paid via ' . $data['bank_name'],
+    ]);
 
-        return redirect()->route('taxpayer.payment')
-            ->with('success', 'Payment processed successfully.')
-            ->with('payment_receipt', $receipt);
+    // Update or create tax summary
+    TaxSummary::updateOrCreate(
+        ['taxpayer_id' => $user->id],
+        [
+            'tax_type' => 'Annual Tax',
+            'tax_amount' => $summary['total_tax'],
+            'status' => $data['amount'] >= $summary['total_tax'] ? 'paid' : 'pending',
+            'payment_id' => $payment->id,
+            'year' => now()->year,
+        ]
+    );
+
+    // Build receipt data for display
+    $receipt = [
+        'reference' => $payment->reference,
+        'tin' => $data['tin'],
+        'bank_name' => $data['bank_name'],
+        'account_number' => $data['account_number'],
+        'amount' => (float) $data['amount'],
+        'paid_at' => $payment->created_at,
+    ];
+
+    return redirect()->route('taxpayer.payment')
+        ->with('success', 'Payment processed successfully.')
+        ->with('payment_receipt', $receipt);
     }
 
     public function complaints(Request $request)
@@ -180,24 +264,42 @@ class TaxpayerController extends Controller
     }
 
     protected function calculateSummary(): array
-    {
-        // Demo calculation; replace with real data later
-        $income = [
-            ['category' => 'Employment', 'amount' => 120000, 'rate' => 0.10],
-            ['category' => 'Business', 'amount' => 60000, 'rate' => 0.15],
-            ['category' => 'Rental', 'amount' => 24000, 'rate' => 0.05],
-        ];
+{
+    $user = auth()->user();
 
-        $breakdown = collect($income)->map(function ($row) {
-            $row['tax'] = round($row['amount'] * $row['rate'], 2);
-            return $row;
-        })->all();
+    // Try to load from DB first
+    $existing = \App\Models\TaxSummary::where('taxpayer_id', $user->id)
+        ->latest()
+        ->first();
 
-        $total = collect($breakdown)->sum('tax');
+    if ($existing) {
         return [
-            'breakdown' => $breakdown,
-            'total_tax' => round($total, 2),
+            'breakdown' => [
+                ['category' => 'Total Declared Income', 'amount' => $existing->tax_amount / 0.15, 'rate' => 0.15, 'tax' => $existing->tax_amount],
+            ],
+            'total_tax' => round($existing->tax_amount, 2),
             'due_date' => now()->addDays(30)->toDateString(),
         ];
     }
+
+    // Otherwise compute a default tax estimate
+    $income = [
+        ['category' => 'Employment', 'amount' => 120000, 'rate' => 0.10],
+        ['category' => 'Business', 'amount' => 60000, 'rate' => 0.15],
+        ['category' => 'Rental', 'amount' => 24000, 'rate' => 0.05],
+    ];
+
+    $breakdown = collect($income)->map(function ($row) {
+        $row['tax'] = round($row['amount'] * $row['rate'], 2);
+        return $row;
+    })->all();
+
+    $total = collect($breakdown)->sum('tax');
+    return [
+        'breakdown' => $breakdown,
+        'total_tax' => round($total, 2),
+        'due_date' => now()->addDays(30)->toDateString(),
+    ];
+}
+
 }
