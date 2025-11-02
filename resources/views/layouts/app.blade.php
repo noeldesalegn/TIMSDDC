@@ -13,14 +13,16 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <style>[x-cloak]{ display: none !important; }</style>
     </head>
     <body class="font-sans antialiased">
-        <div x-data="{ sidebarOpen: false }" class="min-h-screen bg-gray-100 dark:bg-gray-900">
+        <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 bg-indigo-600 text-white px-3 py-2 rounded">Skip to main content</a>
+        <div x-data="{ sidebarOpen: false, toast: { show:false, type:'success', message:'' }, showToast(msg,type='success'){ this.toast={show:true,type,message:msg}; setTimeout(()=>this.toast.show=false, 3000); } }" x-init="window.addEventListener('toast', (e)=>showToast(e.detail.message, e.detail.type || 'success'))" class="min-h-screen bg-gray-100 dark:bg-gray-900">
             <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                 <div class="mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex items-center justify-between h-16">
                         <div class="flex items-center gap-3">
-                            <button @click="sidebarOpen = !sidebarOpen" class="sm:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <button @click="sidebarOpen = !sidebarOpen" :aria-expanded="sidebarOpen.toString()" aria-controls="sidebar" class="sm:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500" aria-label="Toggle navigation menu">
                                 <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                                 </svg>
@@ -74,8 +76,8 @@
             </header>
 
             <div class="flex">
-                <aside :class="{'-translate-x-full': !sidebarOpen, 'translate-x-0': sidebarOpen}" class="fixed sm:static inset-y-0 left-0 z-40 w-64 transform bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-transform duration-200 ease-in-out sm:translate-x-0">
-                    <nav class="p-4 space-y-2">
+                <aside id="sidebar" :class="{'-translate-x-full': !sidebarOpen, 'translate-x-0': sidebarOpen}" class="fixed sm:static inset-y-0 left-0 z-40 w-64 transform bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-transform duration-200 ease-in-out sm:translate-x-0">
+                    <nav class="p-4 space-y-2" role="navigation" aria-label="Sidebar">
                         @php $role = Auth::user()->role ?? null; @endphp
                         @if ($role === 'admin')
                             @include('layouts.partials.nav-admin')
@@ -88,7 +90,7 @@
                         @endif
                     </nav>
                 </aside>
-                <div @click="sidebarOpen = false" :class="{'block': sidebarOpen, 'hidden': !sidebarOpen}" class="fixed inset-0 z-30 bg-black/50 sm:hidden"></div>
+                <div @click="sidebarOpen = false" :class="{'block': sidebarOpen, 'hidden': !sidebarOpen}" class="fixed inset-0 z-30 bg-black/50 sm:hidden" role="presentation" :aria-hidden="(!sidebarOpen).toString()"></div>
 
                 <div class="flex-1">
                     @isset($header)
@@ -99,9 +101,22 @@
                         </header>
                     @endisset
 
-                    <main class="p-4 sm:p-6 lg:p-8">
+                    <main id="main-content" role="main" tabindex="-1" class="p-4 sm:p-6 lg:p-8">
                         {{ $slot }}
                     </main>
+                </div>
+            </div>
+            <script>
+                window.addEventListener('DOMContentLoaded', function(){
+                    const s = @json(session('success'));
+                    const e = @json(session('error'));
+                    if (s) window.dispatchEvent(new CustomEvent('toast', { detail: { type:'success', message: s }}));
+                    if (e) window.dispatchEvent(new CustomEvent('toast', { detail: { type:'error', message: e }}));
+                });
+            </script>
+            <div aria-live="polite" aria-atomic="true" class="fixed bottom-4 right-4 z-50" x-cloak x-show="toast.show">
+                <div :class="toast.type==='success' ? 'bg-green-600' : 'bg-red-600'" class="text-white px-4 py-3 rounded shadow">
+                    <span x-text="toast.message"></span>
                 </div>
             </div>
         </div>
