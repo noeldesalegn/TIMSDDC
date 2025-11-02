@@ -41,7 +41,7 @@
             <div class="p-6">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6">Payment Information</h3>
                 
-                <form method="POST" action="{{ route('taxpayer.payment.process') }}" class="space-y-6" @submit.prevent="showConfirmation = true">
+                <form id="entryForm" method="POST" action="{{ route('taxpayer.payment.process') }}" class="space-y-6" @submit.prevent="showConfirmation = true">
                     @csrf
                     
                     <!-- TIN -->
@@ -195,7 +195,7 @@
                     <button type="button" @click="showConfirmation = false" class="flex-1 inline-flex items-center justify-center px-6 py-3 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 font-semibold rounded-lg transition">
                         Cancel
                     </button>
-                    <button type="button" onclick="document.getElementById('paymentForm').submit()" class="flex-1 inline-flex items-center justify-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition">
+                    <button type="button" onclick="submitPaymentConfirmation()" class="flex-1 inline-flex items-center justify-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                         </svg>
@@ -263,4 +263,33 @@
             </div>
         @endif
     </div>
+<script>
+function submitPaymentConfirmation() {
+    var entryForm = document.getElementById('entryForm');
+    var confirmForm = document.getElementById('paymentForm');
+    var fields = ['tin','bank_name','account_number','amount'];
+    fields.forEach(function(name){
+        var existing = confirmForm.querySelector('input[name="'+name+'"]');
+        if (existing) existing.remove();
+        var src = entryForm.querySelector('[name="'+name+'"]');
+        if (src) {
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = src.value;
+            confirmForm.appendChild(input);
+        }
+    });
+    var methodInput = confirmForm.querySelector('input[name="payment_method"]');
+    if (methodInput) methodInput.remove();
+    var selectedMethod = document.querySelector('input[type="radio"][x-model="paymentMethod"]:checked');
+    var methodValue = selectedMethod ? selectedMethod.value : 'bank_transfer';
+    var hidden = document.createElement('input');
+    hidden.type = 'hidden';
+    hidden.name = 'payment_method';
+    hidden.value = methodValue;
+    confirmForm.appendChild(hidden);
+    confirmForm.submit();
+}
+</script>
 </x-app-layout>

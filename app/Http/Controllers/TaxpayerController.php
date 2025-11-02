@@ -139,35 +139,36 @@ class TaxpayerController extends Controller
         'bank_name' => ['required','string','max:100'],
         'account_number' => ['required','string','max:34'],
         'amount' => ['required','numeric','min:0'],
+        'payment_method' => ['nullable','string','in:bank_transfer,mobile_banking,card'],
     ]);
 
     $user = auth()->user();
     $summary = $this->calculateSummary();
 
     // Create a payment record
+    $reference = strtoupper(Str::random(10));
     $payment = Payment::create([
         'user_id' => $user->id,
         'amount' => $data['amount'],
         'status' => 'completed',
-        'reference' => strtoupper(Str::random(10)),
-        'notes' => 'Paid via ' . $data['bank_name'],
     ]);
 
-    // Update or create tax summary
+    // Update or create tax summary aligned with current schema
     TaxSummary::updateOrCreate(
-        ['taxpayer_id' => $user->id],
         [
-            'tax_type' => 'Annual Tax',
+            'taxpayer_id' => $user->id,
+            'tax_period' => now()->format('Y-m'),
+        ],
+        [
+            'tax_type' => 'Business',
             'tax_amount' => $summary['total_tax'],
             'status' => $data['amount'] >= $summary['total_tax'] ? 'paid' : 'pending',
-            'payment_id' => $payment->id,
-            'year' => now()->year,
         ]
     );
 
     // Build receipt data for display
     $receipt = [
-        'reference' => $payment->reference,
+        'reference' => $reference,
         'tin' => $data['tin'],
         'bank_name' => $data['bank_name'],
         'account_number' => $data['account_number'],
