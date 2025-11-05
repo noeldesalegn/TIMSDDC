@@ -8,10 +8,13 @@ class Payment extends Model
 {
     protected $fillable = [
         'user_id',
+        'tin',
+        'bank_name',
+        'account_number',
         'amount',
-        'status',
-        'reference',
-        'notes',
+        'payment_method',
+        'receipt_path',
+        'status'
     ];
 
     protected $casts = [

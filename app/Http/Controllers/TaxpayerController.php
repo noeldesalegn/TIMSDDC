@@ -15,7 +15,7 @@ class TaxpayerController extends Controller
     public function index()
     {
         $summary = $this->calculateSummary();
-        
+
         // Get payment history from database
         $user = auth()->user();
         $paymentHistory = $user->payments()
@@ -29,7 +29,7 @@ class TaxpayerController extends Controller
                     'status' => ucfirst($payment->status),
                 ];
             });
-        
+
         // Get recent news from database
         $recentNews = News::orderBy('created_at', 'desc')
             ->take(3)
@@ -43,14 +43,14 @@ class TaxpayerController extends Controller
                 ];
             })
             ->toArray();
-        
+
         // Fallback if no data
         if ($paymentHistory->isEmpty()) {
             $paymentHistory = collect([
                 ['amount' => 0, 'date' => now()->toDateString(), 'status' => 'No payments'],
             ]);
         }
-        
+
         return view('taxpayer.dashboard', [
             'taxSummary' => $summary,
             'paymentHistory' => $paymentHistory,
@@ -135,23 +135,34 @@ class TaxpayerController extends Controller
     public function processPayment(Request $request)
     {
         $data = $request->validate([
-        'tin' => ['required','string','min:6','max:32'],
-        'bank_name' => ['required','string','max:100'],
-        'account_number' => ['required','string','max:34'],
-        'amount' => ['required','numeric','min:0'],
-        'payment_method' => ['nullable','string','in:bank_transfer,mobile_banking,card'],
-    ]);
+            'tin' => ['required','string','min:6','max:32'],
+            'bank_name' => ['required','string','max:100'],
+            'account_number' => ['required','string','max:34'],
+            'amount' => ['required','numeric','min:0'],
+            'payment_method' => ['nullable','string','in:bank_transfer,mobile_banking,card'],
+            'receipt_photo' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+        ]);
 
-    $user = auth()->user();
-    $summary = $this->calculateSummary();
+        $user = auth()->user();
+        $summary = $this->calculateSummary();
+        // Handle optional file upload
+        $receiptPath = null;
+        if ($request->hasFile('receipt_photo')) {
+            $receiptPath = $request->file('receipt_photo')->store('receipts', 'public');
+        }
 
     // Create a payment record
     $reference = strtoupper(Str::random(10));
-    $payment = Payment::create([
-        'user_id' => $user->id,
-        'amount' => $data['amount'],
-        'status' => 'completed',
-    ]);
+        $payment = Payment::create([
+            'user_id' => $user->id,
+            'tin' => $data['tin'],
+            'bank_name' => $data['bank_name'],
+            'account_number' => $data['account_number'],
+            'amount' => $data['amount'],
+            'payment_method' => $data['payment_method'] ?? 'bank_transfer',
+            'receipt_path' => $receiptPath,
+            'status' => 'completed',
+        ]);
 
     // Update or create tax summary aligned with current schema
     TaxSummary::updateOrCreate(
@@ -163,6 +174,7 @@ class TaxpayerController extends Controller
             'tax_type' => 'Business',
             'tax_amount' => $summary['total_tax'],
             'status' => $data['amount'] >= $summary['total_tax'] ? 'paid' : 'pending',
+            'payment_id' => $payment->id,
         ]
     );
 
@@ -172,8 +184,9 @@ class TaxpayerController extends Controller
         'tin' => $data['tin'],
         'bank_name' => $data['bank_name'],
         'account_number' => $data['account_number'],
-        'amount' => (float) $data['amount'],
+        'amount' => $data['amount'],
         'paid_at' => $payment->created_at,
+        'receipt_path' => $receiptPath,
     ];
 
     return redirect()->route('taxpayer.payment')
@@ -199,7 +212,7 @@ class TaxpayerController extends Controller
                 ];
             })
             ->toArray();
-        
+
         return view('taxpayer.complaints', compact('complaints'));
     }
 
@@ -239,10 +252,10 @@ class TaxpayerController extends Controller
                 ];
             })
             ->toArray();
-        
+
         // Get comments from session (will be moved to database later)
         $comments = $request->session()->get('taxpayer_comments', []);
-        
+
         return view('taxpayer.news', compact('news', 'comments'));
     }
 
