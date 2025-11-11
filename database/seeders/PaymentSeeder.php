@@ -26,6 +26,10 @@ class PaymentSeeder extends Seeder
                     'tin' => 'TIN' . str_pad($taxpayer->id, 5, '0', STR_PAD_LEFT), // generate fake TIN
                     'bank_name' => 'Commercial Bank of Ethiopia',
                     'account_number' => '1000' . rand(10000, 99999),
+                    'payment_method' => 'bank_transfer',
+                    'verified_at' => now()->subDays(rand(1, 30)),
+                    'verified_by' => User::where('role', 'admin')->inRandomOrder()->first()->id,
+                    'verification_status' => 'verified',
                     'created_at' => now()->subDays(rand(1, 60)),
                     'updated_at' => now()->subDays(rand(1, 60)),
                 ]);

@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Payment;
 use App\Models\Complaint;
 use App\Models\TaxSummary;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AdminTaxpayerController extends Controller
@@ -126,5 +127,34 @@ class AdminTaxpayerController extends Controller
         }, $filename, [
             'Content-Type' => 'text/csv',
         ]);
+    }
+    public function payments()
+    {
+        $payments = Payment::with('user')->orderBy('created_at', 'desc')->paginate(10);
+
+        return view('admin.taxpayers.payments', compact('payments'));
+    }
+    public function verifyPayment($id)
+    {
+        $payment = Payment::findOrFail($id);
+        $payment->update([
+            'verification_status' => 'verified',
+            'verified_at' => now(),
+            'verified_by' => Auth::id(),
+        ]);
+
+        return back()->with('success', 'Payment verified successfully.');
+    }
+
+    public function rejectPayment($id)
+    {
+        $payment = Payment::findOrFail($id);
+        $payment->update([
+            'verification_status' => 'rejected',
+            'verified_at' => now(),
+            'verified_by' => Auth::id(),
+        ]);
+
+        return back()->with('error', 'Payment rejected.');
     }
 }

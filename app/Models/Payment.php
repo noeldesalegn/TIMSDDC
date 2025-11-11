@@ -14,7 +14,10 @@ class Payment extends Model
         'amount',
         'payment_method',
         'receipt_path',
-        'status'
+        'status',
+        'verified_at',
+        'verified_by',
+        'verification_status',
     ];
 
     protected $casts = [

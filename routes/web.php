@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminTaxpayerController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
@@ -20,11 +21,14 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
     // Admin Taxpayers
-    Route::get('/admin/taxpayers', [\App\Http\Controllers\AdminTaxpayerController::class, 'index'])->name('admin.taxpayers.index');
-    Route::get('/admin/taxpayers/export', [\App\Http\Controllers\AdminTaxpayerController::class, 'export'])->name('admin.taxpayers.export');
-    Route::post('/admin/taxpayers/bulk-verify', [\App\Http\Controllers\AdminTaxpayerController::class, 'bulkVerify'])->name('admin.taxpayers.bulkVerify');
-    Route::get('/admin/taxpayers/{user}', [\App\Http\Controllers\AdminTaxpayerController::class, 'show'])->name('admin.taxpayers.show');
-    Route::patch('/admin/taxpayers/{user}', [\App\Http\Controllers\AdminTaxpayerController::class, 'update'])->name('admin.taxpayers.update');
+    Route::get('/admin/taxpayers', [AdminTaxpayerController::class, 'index'])->name('admin.taxpayers.index');
+    Route::get('/admin/taxpayers/export', [AdminTaxpayerController::class, 'export'])->name('admin.taxpayers.export');
+    Route::post('/admin/taxpayers/bulk-verify', [AdminTaxpayerController::class, 'bulkVerify'])->name('admin.taxpayers.bulkVerify');
+    Route::get('/admin/taxpayers/payments', [AdminTaxpayerController::class, 'payments'])->name('admin.taxpayers.payments');
+    Route::get('/admin/taxpayers/{user}', [AdminTaxpayerController::class, 'show'])->name('admin.taxpayers.show');
+    Route::patch('/admin/taxpayers/{user}', [AdminTaxpayerController::class, 'update'])->name('admin.taxpayers.update');
+    Route::post('/admin/taxpayers/payments/{id}/verify', [AdminTaxpayerController::class, 'verifyPayment'])->name('admin.taxpayers.payments.verify');
+    Route::post('/admin/taxpayers/payments/{id}/reject', [AdminTaxpayerController::class, 'rejectPayment'])->name('admin.taxpayers.payments.reject');
 
     // Admin News
     Route::get('/admin/news', [\App\Http\Controllers\AdminNewsController::class, 'index'])->name('admin.news.index');
@@ -79,7 +83,7 @@ Route::middleware(['auth', 'role:interviewer'])->group(function () {
 });
 Route::get('/dashboard', function () {
     $user = auth()->user();
-    
+
     // Redirect based on role
     if ($user->role === 'admin') {
         return redirect()->route('admin.dashboard');
@@ -88,7 +92,7 @@ Route::get('/dashboard', function () {
     } elseif ($user->role === 'interviewer') {
         return redirect()->route('interviewer.dashboard');
     }
-    
+
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 

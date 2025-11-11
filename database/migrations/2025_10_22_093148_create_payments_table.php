@@ -21,6 +21,9 @@ return new class extends Migration
             $table->string('payment_method')->default('bank_transfer');
             $table->string('receipt_path')->nullable();
             $table->string('status')->default('pending');
+            $table->timestamp('verified_at')->nullable();
+            $table->foreignId('verified_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->string('verification_status')->default('pending');
             $table->timestamps();
         });
     }

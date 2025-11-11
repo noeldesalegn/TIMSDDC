@@ -147,8 +147,8 @@
         </div>
 
         {{-- Payment Receipt --}}
-        @if (session('payment_receipt'))
-            @php $receipt = session('payment_receipt'); @endphp
+        @if (session('receipt_path'))
+            @php $receipt = session('receipt_path'); @endphp
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg border-2 border-green-500">
                 <div class="p-6">
                     <div class="flex items-center justify-between mb-6">
