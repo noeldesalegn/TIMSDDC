@@ -26,6 +26,15 @@
                     <x-nav-link :href="$dashboardRoute" :active="request()->url() === $dashboardRoute">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+
+                    @if ($user->role === 'cashier')
+                        <x-nav-link :href="route('cashier.payments.index')" :active="request()->routeIs('cashier.payments.index')">
+                            {{ __('Payments') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('cashier.payments.create')" :active="request()->routeIs('cashier.payments.create')">
+                            {{ __('New Payment') }}
+                        </x-nav-link>
+                    @endif
                 </div>
             </div>
 
@@ -79,9 +88,18 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+            <x-responsive-nav-link :href="$dashboardRoute" :active="request()->url() === $dashboardRoute">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+
+            @if ($user->role === 'cashier')
+                <x-responsive-nav-link :href="route('cashier.payments.index')" :active="request()->routeIs('cashier.payments.index')">
+                    {{ __('Payments') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('cashier.payments.create')" :active="request()->routeIs('cashier.payments.create')">
+                    {{ __('New Payment') }}
+                </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->

@@ -8,6 +8,7 @@ class Payment extends Model
 {
     protected $fillable = [
         'user_id',
+        'processed_by',
         'tin',
         'bank_name',
         'account_number',
@@ -27,5 +28,10 @@ class Payment extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function processedBy()
+    {
+        return $this->belongsTo(User::class, 'processed_by');
     }
 }

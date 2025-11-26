@@ -85,6 +85,8 @@
                             @include('layouts.partials.nav-taxpayer')
                         @elseif ($role === 'interviewer')
                             @include('layouts.partials.nav-interviewer')
+                        @elseif ($role === 'cashier')
+                            @include('layouts.partials.nav-cashier')
                         @else
                             <div class="text-sm text-gray-500">No navigation available.</div>
                         @endif

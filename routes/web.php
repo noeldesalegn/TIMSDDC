@@ -6,12 +6,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\TaxpayerController;
 use App\Http\Controllers\InterviewerController;
+use App\Http\Controllers\CashierPaymentController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('landing');
 });
-
-
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -81,16 +80,26 @@ Route::middleware(['auth', 'role:interviewer'])->group(function () {
     Route::get('/interviewer/reports/{report}', [\App\Http\Controllers\InterviewerReportsController::class, 'show'])->name('interviewer.reports.show');
     Route::patch('/interviewer/reports/{report}', [\App\Http\Controllers\InterviewerReportsController::class, 'update'])->name('interviewer.reports.update');
 });
+Route::middleware(['auth', 'role:cashier'])->group(function () {
+    Route::get('/cashier/dashboard', [CashierPaymentController::class, 'dashboard'])->name('cashier.dashboard');
+    Route::get('/cashier/payments', [CashierPaymentController::class, 'viewPaymentHistory'])->name('cashier.payments.index');
+    Route::get('/cashier/payments/create', [CashierPaymentController::class, 'create'])->name('cashier.payments.create');
+    Route::post('/cashier/payments', [CashierPaymentController::class, 'processPayment'])->name('cashier.payments.store');
+    Route::get('/cashier/payments/{payment}/receipt', [CashierPaymentController::class, 'generateReceipt'])->name('cashier.payments.receipt');
+    Route::post('/cashier/payments/{payment}/refund', [CashierPaymentController::class, 'processRefunds'])->name('cashier.payments.refund');
+    Route::get('/cashier/api/verify-taxpayer', [CashierPaymentController::class, 'verifyTaxpayer'])->name('cashier.taxpayers.verify');
+});
 Route::get('/dashboard', function () {
     $user = auth()->user();
 
-    // Redirect based on role
     if ($user->role === 'admin') {
         return redirect()->route('admin.dashboard');
     } elseif ($user->role === 'taxpayer') {
         return redirect()->route('taxpayer.dashboard');
     } elseif ($user->role === 'interviewer') {
         return redirect()->route('interviewer.dashboard');
+    } elseif ($user->role === 'cashier') {
+        return redirect()->route('cashier.dashboard');
     }
 
     return view('dashboard');
