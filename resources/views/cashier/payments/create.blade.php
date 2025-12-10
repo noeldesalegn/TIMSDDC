@@ -21,7 +21,7 @@
                 <div class="p-6 space-y-6">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Payment Details</h3>
 
-                    <form method="POST" action="{{ route('cashier.payments.store') }}" class="space-y-5">
+                    <form method="POST" action="{{ route('cashier.payments.store') }}" enctype="multipart/form-data" class="space-y-5">
                         @csrf
 
                         <div>
@@ -53,6 +53,18 @@
                                     <option value="card" {{ old('payment_method') === 'card' ? 'selected' : '' }}>Card</option>
                                 </select>
                             </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Upload Payment Receipt (optional)</label>
+                            <input
+                                type="file"
+                                name="receipt_photo"
+                                accept="image/*,application/pdf"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+                            />
+                            @error('receipt_photo')
+                            <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <div class="flex justify-end gap-3">

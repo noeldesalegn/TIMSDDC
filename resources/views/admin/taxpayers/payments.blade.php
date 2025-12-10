@@ -17,6 +17,7 @@
                         <thead class="bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                         <tr>
                             <th class="px-4 py-2 text-left">User</th>
+                            <th class="px-4 py-2 text-left">TIN</th>
                             <th class="px-4 py-2 text-left">Amount</th>
                             <th class="px-4 py-2 text-left">Bank</th>
                             <th class="px-4 py-2 text-left">Receipt</th>
@@ -28,6 +29,7 @@
                         @foreach ($payments as $payment)
                             <tr class="border-b dark:border-gray-700 text-gray-900 dark:text-gray-100">
                                 <td class="px-4 py-2">{{ $payment->user->name ?? 'N/A' }}</td>
+                                <td class="px-4 py-2">{{ $payment->user->tin ?? 'N/A' }}</td>
                                 <td class="px-4 py-2">ETB {{ number_format($payment->amount, 2) }}</td>
                                 <td class="px-4 py-2">{{ $payment->bank_name }}</td>
                                 <td class="px-4 py-2">

@@ -78,6 +78,7 @@
                                     <th class="px-4 py-2 text-left font-medium text-gray-500 dark:text-gray-300">Amount</th>
                                     <th class="px-4 py-2 text-left font-medium text-gray-500 dark:text-gray-300">Status</th>
                                     <th class="px-4 py-2 text-left font-medium text-gray-500 dark:text-gray-300">Processed By</th>
+                                    <th class="px-4 py-2 text-left font-medium text-gray-500 dark:text-gray-300">Receipt</th>
                                     <th class="px-4 py-2 text-right font-medium text-gray-500 dark:text-gray-300">Actions</th>
                                 </tr>
                             </thead>
@@ -92,17 +93,31 @@
                                             <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
                                                 @if($payment->status === 'completed') bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200
                                                 @elseif($payment->status === 'refunded') bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100
+                                                @elseif($payment->status === 'pending') bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
+                                                @elseif($payment->status === 'rejected') bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-200
                                                 @else bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 @endif">
                                                 {{ ucfirst($payment->status) }}
                                             </span>
                                         </td>
                                         <td class="px-4 py-2 text-gray-900 dark:text-gray-100">{{ optional($payment->processedBy)->name ?? 'N/A' }}</td>
+                                        <td class="px-4 py-2 text-gray-900 dark:text-gray-100">
+                                            @if ($payment->receipt_path)
+                                                @if (Str::endsWith($payment->receipt_path, ['.jpg', '.jpeg', '.png']))
+                                                    <a href="{{ asset('storage/'.$payment->receipt_path) }}" target="_blank">
+                                                        <img src="{{ asset('storage/'.$payment->receipt_path) }}" alt="Receipt" class="h-12 rounded">
+                                                    </a>
+                                                @else
+                                                    <a href="{{ asset('storage/'.$payment->receipt_path) }}" target="_blank" class="text-indigo-600 underline">View PDF</a>
+                                                @endif
+                                            @else
+                                                <span class="text-gray-500 text-sm">No receipt</span>
+                                            @endif
                                         <td class="px-4 py-2 text-right space-x-2">
                                             <a href="{{ route('cashier.payments.receipt', $payment) }}" class="inline-flex items-center px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-md">Receipt</a>
                                             @if($payment->status === 'completed')
                                                 <form method="POST" action="{{ route('cashier.payments.refund', $payment) }}" class="inline">
                                                     @csrf
-                                                    <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-md" onclick="return confirm('Refund this payment?')">
+                                                    <button type="submit" class="inline-flex items-center mt-2 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-md" onclick="return confirm('Refund this payment?')">
                                                         Refund
                                                     </button>
                                                 </form>

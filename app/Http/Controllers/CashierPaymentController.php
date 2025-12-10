@@ -206,6 +206,7 @@ class CashierPaymentController extends Controller
             'account_number' => ['nullable', 'string', 'max:34'],
             'amount' => ['required', 'numeric', 'min:0.01'],
             'payment_method' => ['nullable', 'string', 'in:bank_transfer,mobile_banking,card'],
+            'receipt_photo' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
         ]);
 
         $cashierId = Auth::id();
@@ -234,7 +235,13 @@ class CashierPaymentController extends Controller
 
         $payment = null;
 
-        DB::transaction(function () use (&$payment, $taxpayer, $cashierId, $data, $summary) {
+
+        DB::transaction(function () use (&$payment, $taxpayer, $cashierId, $data, $summary,$request) {
+            $receiptPath = null;
+
+            if ($request->hasFile('receipt_photo')) {
+                $receiptPath = $request->file('receipt_photo')->store('receipts', 'public');
+            }
             $payment = Payment::create([
                 'user_id' => $taxpayer->id,
                 'processed_by' => $cashierId,
@@ -243,8 +250,9 @@ class CashierPaymentController extends Controller
                 'account_number' => $data['account_number'] ?? null,
                 'amount' => $data['amount'],
                 'payment_method' => $data['payment_method'] ?? 'bank_transfer',
-                'status' => 'completed',
+                'status' => 'pending',
                 'verification_status' => 'pending',
+                'receipt_path' => $receiptPath,
             ]);
 
             // Update taxpayer account ledger

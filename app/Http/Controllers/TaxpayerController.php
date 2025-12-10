@@ -144,7 +144,9 @@ class TaxpayerController extends Controller
         ]);
 
         $user = auth()->user();
+
         $summary = $this->calculateSummary();
+
         // Handle optional file upload
         $receiptPath = null;
         if ($request->hasFile('receipt_photo')) {

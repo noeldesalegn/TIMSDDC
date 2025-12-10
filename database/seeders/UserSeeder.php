@@ -66,10 +66,10 @@ class UserSeeder extends Seeder
         ]);
 
         User::create([
-            'name' => 'Hassan Taxpayer',
+            'name' => 'Hassan Cashier',
             'email' => 'hassan@test.com',
             'password' => Hash::make('password'),
-            'role' => 'taxpayer',
+            'role' => 'cashier',
         ]);
     }
 }

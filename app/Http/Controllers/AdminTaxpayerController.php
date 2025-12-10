@@ -139,11 +139,12 @@ class AdminTaxpayerController extends Controller
         $payment = Payment::findOrFail($id);
         $payment->update([
             'verification_status' => 'verified',
+            'status' => 'completed',
             'verified_at' => now(),
             'verified_by' => Auth::id(),
         ]);
 
-        return back()->with('success', 'Payment verified successfully.');
+        return back()->with('success', 'Payment verified successfully and marked as completed.');
     }
 
     public function rejectPayment($id)
@@ -151,6 +152,7 @@ class AdminTaxpayerController extends Controller
         $payment = Payment::findOrFail($id);
         $payment->update([
             'verification_status' => 'rejected',
+            'status' => 'rejected',
             'verified_at' => now(),
             'verified_by' => Auth::id(),
         ]);
