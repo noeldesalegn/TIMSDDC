@@ -163,7 +163,7 @@ class TaxpayerController extends Controller
             'amount' => $data['amount'],
             'payment_method' => $data['payment_method'] ?? 'bank_transfer',
             'receipt_path' => $receiptPath,
-            'status' => 'completed',
+            'status' => 'pending',
         ]);
 
     // Update or create tax summary aligned with current schema

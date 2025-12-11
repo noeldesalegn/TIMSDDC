@@ -139,12 +139,12 @@ class AdminTaxpayerController extends Controller
         $payment = Payment::findOrFail($id);
         $payment->update([
             'verification_status' => 'verified',
-            'status' => 'completed',
+            'status' => 'paid',
             'verified_at' => now(),
             'verified_by' => Auth::id(),
         ]);
 
-        return back()->with('success', 'Payment verified successfully and marked as completed.');
+        return back()->with('success', 'Payment verified successfully and marked as paid.');
     }
 
     public function rejectPayment($id)
@@ -159,4 +159,55 @@ class AdminTaxpayerController extends Controller
 
         return back()->with('error', 'Payment rejected.');
     }
+
+    public function taxcalc()
+    {
+        $summaries = TaxSummary::with('taxpayer')->orderBy('created_at', 'desc')->paginate(10);
+
+        return view('admin.tax.index', compact('summaries'));
+    }
+    public function calculateTax(Request $request, TaxSummary $summary)
+    {
+        $data = $request->validate([
+            'taxable_income' => 'required|numeric|min:0',
+            'tax_rate' => 'required|numeric|min:0|max:100',
+            'deductible' => 'nullable|numeric|min:0',
+            'tax_period' => 'nullable|string|max:255',
+            'category' => 'nullable|in:A,B,C',
+        ]);
+
+        $income = (float)$data['taxable_income'];
+        $rate = (float)$data['tax_rate'];
+        $deductible = (float)($data['deductible'] ?? 0);
+
+        // Calculate tax
+        $taxBeforeDeduct = $income * ($rate / 100);
+        $taxAmount = max($taxBeforeDeduct - $deductible, 0);
+
+        $summary->update([
+            'taxable_income' => $income,
+            'tax_rate' => $rate,
+            'deductible' => $deductible,
+            'tax_amount' => $taxAmount,
+            'tax_period' => $data['tax_period'],
+            'category' => $data['category'],
+            'status' => 'pending', // after calculation
+        ]);
+
+        return back()->with('success', 'Tax calculation successful.');
+    }
+    public function edit(TaxSummary $summary)
+    {
+        return view('admin.tax.edit', compact('summary'));
+    }
+    public function verify(TaxSummary $summary)
+    {
+        // Optional: update status field
+        $summary->status = 'paid'; // or 'verified' if you add that
+        $summary->save();
+
+        return back()->with('success', 'Tax summary marked as verified.');
+    }
+
+
 }

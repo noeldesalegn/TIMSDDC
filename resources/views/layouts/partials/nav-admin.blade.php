@@ -26,7 +26,7 @@
     <a href="{{ route('admin.news.index') }}" class="{{ $linkBase }} {{ $isNews ? $linkActive : $linkIdle }}" @if($isNews) aria-current="page" @endif>
         <span>Post News</span>
     </a>
-    <a href="#" class="{{ $linkBase }} {{ $linkIdle }}">
+    <a href="{{ route('admin.tax.index') }}" class="{{ $linkBase }} {{ $linkIdle }}">
         <span>Tax Calculation</span>
     </a>
     <a href="{{ route('admin.reports.index') }}" class="{{ $linkBase }} {{ $isReports ? $linkActive : $linkIdle }}" @if($isReports) aria-current="page" @endif>

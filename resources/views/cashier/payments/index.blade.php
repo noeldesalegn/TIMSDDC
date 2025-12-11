@@ -91,7 +91,7 @@
                                         <td class="px-4 py-2 text-gray-900 dark:text-gray-100">ETB {{ number_format($payment->amount, 2) }}</td>
                                         <td class="px-4 py-2">
                                             <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
-                                                @if($payment->status === 'completed') bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200
+                                                @if($payment->status === 'paid') bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200
                                                 @elseif($payment->status === 'refunded') bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100
                                                 @elseif($payment->status === 'pending') bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
                                                 @elseif($payment->status === 'rejected') bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-200

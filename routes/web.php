@@ -46,6 +46,20 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/complaints', [\App\Http\Controllers\AdminComplaintsController::class, 'index'])->name('admin.complaints.index');
     Route::get('/admin/complaints/{complaint}', [\App\Http\Controllers\AdminComplaintsController::class, 'show'])->name('admin.complaints.show');
     Route::patch('/admin/complaints/{complaint}', [\App\Http\Controllers\AdminComplaintsController::class, 'update'])->name('admin.complaints.update');
+
+    // Admin tax summaries
+    Route::get('/admin/tax', [AdminTaxpayerController::class, 'taxcalc'])->name('admin.tax.index');
+    Route::post('/admin/tax/{summary}/calculate',
+        [AdminTaxpayerController::class, 'calculateTax'])
+        ->name('admin.tax.calculate');
+    Route::get('/admin/tax/{summary}/verify', [AdminTaxpayerController::class, 'verify'])
+        ->name('admin.tax.verify');
+
+    Route::get('/admin/tax/{summary}/edit', [AdminTaxpayerController::class, 'edit'])
+        ->name('admin.tax.edit');
+    Route::patch('/admin/tax/{summary}', [AdminTaxpayerController::class, 'updateTax'])
+        ->name('admin.tax.update');
+
 });
 Route::middleware(['auth', 'role:taxpayer'])->group(function () {
     Route::get('/taxpayer/dashboard', [TaxpayerController::class, 'index'])->name('taxpayer.dashboard');
