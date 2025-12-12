@@ -10,6 +10,8 @@ class InterviewerScheduleController extends Controller
 {
     public function index(Request $request)
     {
+
+
         return view('interviewer.schedule');
     }
 

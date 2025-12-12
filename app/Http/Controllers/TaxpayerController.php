@@ -125,10 +125,12 @@ class TaxpayerController extends Controller
 
     public function paymentForm(Request $request)
     {
+        $user = auth()->user();
         $summary = $this->calculateSummary();
         return view('taxpayer.payment', [
             'amountDue' => $summary['total_tax'],
             'dueDate' => $summary['due_date'],
+            'tin' => $user->tin,
         ]);
     }
 

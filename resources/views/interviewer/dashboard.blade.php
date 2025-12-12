@@ -62,6 +62,37 @@
                 </div>
             </div>
 
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-700/50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Email</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">TIN</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Created</th>
+                        </tr>
+                        </thead>
+                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        @foreach ($taxpayers as $taxpayer)
+                            <tr>
+                                <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">{{ $taxpayer->name }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">{{ $taxpayer->email }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">{{ $taxpayer->tin }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">{{ optional($taxpayer->created_at)->format('M d, Y') }}</td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+
+                    <div class="mt-4">
+                        {{ $taxpayers->links() }} {{-- Pagination --}}
+                    </div>
+                </div>
+            </div>
+            <br>
+
+
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Schedule Overview -->
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
@@ -83,7 +114,7 @@
                                             <p class="text-sm text-gray-500 dark:text-gray-400">{{ $appointment['time'] }}</p>
                                         </div>
                                     </div>
-                                    <span class="px-3 py-1 text-xs font-semibold rounded-full 
+                                    <span class="px-3 py-1 text-xs font-semibold rounded-full
                                         @if($appointment['status'] === 'Confirmed') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
                                         @else bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
                                         @endif">
@@ -131,7 +162,7 @@
                                         </td>
                                         <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ \Carbon\Carbon::parse($upload['date'])->format('M d, Y') }}</td>
                                         <td class="px-4 py-3 whitespace-nowrap">
-                                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
                                                 @if($upload['status'] === 'Processed') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
                                                 @else bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
                                                 @endif">
