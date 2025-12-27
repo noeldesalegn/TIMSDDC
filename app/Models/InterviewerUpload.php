@@ -8,6 +8,7 @@ class InterviewerUpload extends Model
 {
     protected $fillable = [
         'user_id',
+        'taxpayer_id',
         'original_name',
         'path',
         'mime',
@@ -25,4 +26,15 @@ class InterviewerUpload extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function taxpayer()
+    {
+        return $this->belongsTo(User::class, 'taxpayer_id');
+    }
+    // uploader (interviewer)
+    public function uploader()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
 }

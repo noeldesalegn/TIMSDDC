@@ -6,6 +6,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\InterviewerAppointment;
+use App\Models\InterviewerUpload;
+use App\Models\InterviewerReport;
+
 
 class User extends Authenticatable
 {
@@ -59,5 +63,18 @@ class User extends Authenticatable
     public function taxpayerAccount()
     {
         return $this->hasOne(TaxpayerAccount::class);
+    }
+
+    public function interviews ()
+    {
+        return $this->hasMany(InterviewerAppointment::class);
+    }
+    public function uploads ()
+    {
+        return $this->hasMany(InterviewerUpload::class,'user_id');
+    }
+    public function reports ()
+    {
+        return $this->hasMany(InterviewerReport::class);
     }
 }

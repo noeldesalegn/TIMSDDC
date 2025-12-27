@@ -33,6 +33,7 @@ class UserSeeder extends Seeder
             'name' => 'Sarah Interviewer',
             'email' => 'sarah@test.com',
             'password' => Hash::make('password'),
+
             'role' => 'interviewer',
         ]);
 
@@ -41,6 +42,7 @@ class UserSeeder extends Seeder
             'name' => 'Ahmed Taxpayer',
             'email' => 'ahmed@test.com',
             'password' => Hash::make('password'),
+            'tin' => 'TIN00004' ,
             'role' => 'taxpayer',
         ]);
 
@@ -48,6 +50,7 @@ class UserSeeder extends Seeder
             'name' => 'Fatima Taxpayer',
             'email' => 'fatima@test.com',
             'password' => Hash::make('password'),
+            'tin' => 'TIN00005' ,
             'role' => 'taxpayer',
         ]);
 
@@ -55,6 +58,7 @@ class UserSeeder extends Seeder
             'name' => 'Mohammed Taxpayer',
             'email' => 'mohammed@test.com',
             'password' => Hash::make('password'),
+            'tin' => 'TIN00006' ,
             'role' => 'taxpayer',
         ]);
 
@@ -62,6 +66,7 @@ class UserSeeder extends Seeder
             'name' => 'Aisha Taxpayer',
             'email' => 'aisha@test.com',
             'password' => Hash::make('password'),
+            'tin' => 'TIN0000' ,
             'role' => 'taxpayer',
         ]);
 
@@ -69,6 +74,7 @@ class UserSeeder extends Seeder
             'name' => 'Hassan Cashier',
             'email' => 'hassan@test.com',
             'password' => Hash::make('password'),
+
             'role' => 'cashier',
         ]);
     }

@@ -3,16 +3,21 @@
 namespace App\Http\Controllers;
 
 
+use App\Models\InterviewerUpload;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class InterviewerController extends Controller
 {
     public function index( Request $request)
     {
-        // Get upload stats from session
-        $filesUploadedToday = request()->session()->get('files_uploaded_today', 0);
-        $pendingUploads = request()->session()->get('pending_uploads', 0);
+        $user = $request->user();
+
+        $filesUploadedToday = InterviewerUpload::where('user_id', $user->id)
+            ->where('status', '!=', 'deleted')
+            ->whereDate('created_at', Carbon::today())
+            ->count();        $pendingUploads = request()->session()->get('pending_uploads', 0);
 
         // Get today's schedule
         $todaySchedule = request()->session()->get('today_schedule', [
@@ -36,6 +41,21 @@ class InterviewerController extends Controller
             'todaySchedule' => $todaySchedule,
             'recentUploads' => $recentUploads,
             'taxpayers' => $taxpayers,
+        ]);
+    }
+    public function taxpayer(User $user)
+    {
+        // Ensure the user is a taxpayer
+        if ($user->role !== 'taxpayer') {
+            abort(404);
+        }
+
+        // Fetch taxpayer details, interviews, and uploads
+        $uploads = $user->uploads()->orderBy('created_at', 'desc')->get();
+
+        return view('interviewer.taxpayer.show', [
+            'taxpayer' => $user,
+            'uploads' => $uploads,
         ]);
     }
 }

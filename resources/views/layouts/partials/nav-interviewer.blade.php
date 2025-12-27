@@ -12,7 +12,7 @@
         <span>Dashboard</span>
     </a>
     <a href="{{ route('interviewer.upload') }}" class="{{ $linkBase }} {{ $isUpload ? $linkActive : $linkIdle }}" @if($isUpload) aria-current="page" @endif>
-        <span>Upload Files</span>
+        <span>Uploaded Files</span>
     </a>
     <a href="{{ route('interviewer.schedule') }}" class="{{ $linkBase }} {{ $isSchedule ? $linkActive : $linkIdle }}" @if($isSchedule) aria-current="page" @endif>
         <span>My Schedule</span>

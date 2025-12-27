@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\InterviewerUpload;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use ZipArchive;
@@ -16,7 +17,10 @@ class InterviewerUploadController extends Controller
         $type = (string) $request->query('type', ''); // image|pdf|doc|all
         $perPage = (int) $request->query('per_page', 12);
 
-        $query = InterviewerUpload::where('user_id', $user->id)->where('status', '!=', 'deleted');
+        $query = InterviewerUpload::with(['uploader', 'taxpayer'])
+            ->where('user_id', $user->id)
+            ->where('status', '!=', 'deleted');
+
         if ($q) {
             $query->where('original_name', 'like', "%$q%");
         }
@@ -33,6 +37,7 @@ class InterviewerUploadController extends Controller
         }
 
         $uploads = $query->latest()->paginate($perPage)->withQueryString();
+
         return view('interviewer.upload', compact('uploads', 'q', 'type', 'perPage'));
     }
 
@@ -156,8 +161,168 @@ class InterviewerUploadController extends Controller
         };
     }
 
-    protected function sanitizeFilename(string $name): string
+    public function taxpayerindex(Request $request, User $taxpayer)
+    {
+        // Ensure selected user is a taxpayer
+        if ($taxpayer->role !== 'taxpayer') {
+            abort(404);
+        }
+
+        $q = trim((string) $request->query('q', ''));
+        $type = (string) $request->query('type', '');
+        $perPage = (int) $request->query('per_page', 12);
+
+        $query = InterviewerUpload::where('taxpayer_id', $taxpayer->id)
+            ->where('status', '!=', 'deleted');
+
+        if ($q) {
+            $query->where('original_name', 'like', "%{$q}%");
+        }
+
+        if ($type) {
+            $query->where(function ($sub) use ($type) {
+                if ($type === 'image') {
+                    $sub->where('mime', 'like', 'image/%');
+                } elseif ($type === 'pdf') {
+                    $sub->where('mime', 'application/pdf');
+                } elseif ($type === 'doc') {
+                    $sub->whereIn('mime', [
+                        'application/msword',
+                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                        'application/vnd.ms-excel',
+                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                        'text/plain',
+                        'text/csv'
+                    ]);
+                }
+            });
+        }
+
+        $uploads = $query->latest()
+            ->paginate($perPage)
+            ->withQueryString();
+
+        return view('interviewer.taxpayer.taxpayeruploads', compact(
+            'taxpayer',
+            'uploads',
+            'q',
+            'type',
+            'perPage'
+        ));
+    }
+
+    /**
+     * STORE uploads FOR THAT TAXPAYER
+     */
+    public function taxpayerindexstore(Request $request, User $taxpayer)
+    {
+        if ($taxpayer->role !== 'taxpayer') {
+            abort(404);
+        }
+
+        $interviewer = $request->user();
+
+        $maxSize = 10 * 1024 * 1024;
+        $allowed = [
+            'application/pdf',
+            'image/jpeg','image/png','image/gif','image/webp',
+            'application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.ms-excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'text/plain','text/csv'
+        ];
+
+        $saved = [];
+
+        /** MULTIPLE FILES */
+        if ($request->hasFile('files')) {
+            foreach ($request->file('files') as $file) {
+                if (
+                    !$file->isValid() ||
+                    $file->getSize() > $maxSize ||
+                    !in_array($file->getMimeType(), $allowed)
+                ) {
+                    continue;
+                }
+
+                $path = $file->store('interviewer_uploads', 'public');
+
+                $saved[] = InterviewerUpload::create([
+                    'user_id'      => $interviewer->id,
+                    'taxpayer_id'  => $taxpayer->id,
+                    'original_name'=> $file->getClientOriginalName(),
+                    'path'         => $path,
+                    'mime'         => $file->getMimeType(),
+                    'size'         => $file->getSize(),
+                    'status'       => 'uploaded',
+                ]);
+            }
+        }
+
+        /** ZIP FILE */
+        if ($request->hasFile('zip')) {
+            $zipFile = $request->file('zip');
+
+            if ($zipFile->isValid() && $zipFile->getClientOriginalExtension() === 'zip') {
+                $zip = new ZipArchive();
+
+                if ($zip->open($zipFile->getRealPath()) === true) {
+                    for ($i = 0; $i < $zip->numFiles; $i++) {
+                        $stat = $zip->statIndex($i);
+                        if (!$stat || str_ends_with($stat['name'], '/')) continue;
+
+                        $stream = $zip->getStream($stat['name']);
+                        if (!$stream) continue;
+
+                        $contents = stream_get_contents($stream);
+                        fclose($stream);
+
+                        if (strlen($contents) > $maxSize) continue;
+
+                        $storedPath = 'interviewer_uploads/' . uniqid() . '_' . basename($stat['name']);
+                        Storage::disk('public')->put($storedPath, $contents);
+
+                        $saved[] = InterviewerUpload::create([
+                            'user_id'      => $interviewer->id,
+                            'taxpayer_id'  => $taxpayer->id,
+                            'original_name'=> basename($stat['name']),
+                            'path'         => $storedPath,
+                            'mime'         => mime_content_type(storage_path('app/public/'.$storedPath)),
+                            'size'         => strlen($contents),
+                            'status'       => 'uploaded',
+                            'meta'         => ['from_zip' => $zipFile->getClientOriginalName()],
+                        ]);
+                    }
+                    $zip->close();
+                }
+            }
+        }
+
+        return back()->with('success', 'Files uploaded: ' . count($saved));
+    }
+
+    public function taxpayerDownload(InterviewerUpload $upload, User $taxpayer)
+    {
+        if (auth()->id() !== $upload->user_id || $upload->taxpayer_id !== $taxpayer->id) {
+            abort(403);
+        }
+        return Storage::disk('public')->download($upload->path, $upload->original_name);
+    }
+
+    public function taxpayerDestroy(InterviewerUpload $upload, User $taxpayer)
+    {
+        if (auth()->id() !== $upload->user_id || $upload->taxpayer_id !== $taxpayer->id) {
+            abort(403);
+        }
+        Storage::disk('public')->delete($upload->path);
+        $upload->status = 'deleted';
+        $upload->save();
+        return back()->with('success', 'File deleted');
+    }
+
+
+        protected function sanitizeFilename(string $name): string
     {
         return preg_replace('/[^A-Za-z0-9_\.-]/', '_', $name);
     }
+
 }

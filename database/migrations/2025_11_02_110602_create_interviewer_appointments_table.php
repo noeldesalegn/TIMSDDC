@@ -12,11 +12,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('taxpayer_id')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('interviewer_id')->constrained('users')->cascadeOnDelete();
             $table->string('title');
             $table->text('notes')->nullable();
             $table->dateTime('start_at');
             $table->dateTime('end_at');
-            $table->string('status')->default('scheduled');
+            $table->enum('status', ['scheduled','completed'])->default('scheduled');
             $table->string('location')->nullable();
             $table->string('contact_phone')->nullable();
             $table->timestamps();

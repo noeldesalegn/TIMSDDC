@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminTaxpayerController;
+use App\Http\Controllers\InterviewerUploadController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
@@ -61,6 +62,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         ->name('admin.tax.update');
 
 });
+
+
 Route::middleware(['auth', 'role:taxpayer'])->group(function () {
     Route::get('/taxpayer/dashboard', [TaxpayerController::class, 'index'])->name('taxpayer.dashboard');
     Route::get('/taxpayer/summary', [TaxpayerController::class, 'summary'])->name('taxpayer.summary');
@@ -71,14 +74,36 @@ Route::middleware(['auth', 'role:taxpayer'])->group(function () {
     Route::get('/taxpayer/news', [TaxpayerController::class, 'news'])->name('taxpayer.news');
     Route::post('/taxpayer/news/{newsId}/comments', [TaxpayerController::class, 'submitComment'])->name('taxpayer.news.comment');
 });
+
+
 Route::middleware(['auth', 'role:interviewer'])->group(function () {
     Route::get('/interviewer/dashboard', [InterviewerController::class, 'index'])->name('interviewer.dashboard');
-
+    Route::get('/interviewer/{user}/taxpayer', [InterviewerController::class, 'taxpayer'])->name('interviewer.taxpayer.show');
     // Interviewer File Uploads
-    Route::get('/interviewer/upload', [\App\Http\Controllers\InterviewerUploadController::class, 'index'])->name('interviewer.upload');
-    Route::post('/interviewer/upload', [\App\Http\Controllers\InterviewerUploadController::class, 'store'])->name('interviewer.upload.store');
-    Route::get('/interviewer/upload/download/{upload}', [\App\Http\Controllers\InterviewerUploadController::class, 'download'])->name('interviewer.upload.download');
-    Route::delete('/interviewer/upload/{upload}', [\App\Http\Controllers\InterviewerUploadController::class, 'destroy'])->name('interviewer.upload.destroy');
+    Route::get('/interviewer/upload', [InterviewerUploadController::class, 'index'])->name('interviewer.upload');
+    Route::post('/interviewer/upload', [InterviewerUploadController::class, 'store'])->name('interviewer.upload.store');
+    Route::get('/interviewer/upload/download/{upload}', [InterviewerUploadController::class, 'download'])->name('interviewer.upload.download');
+    Route::delete('/interviewer/upload/{upload}', [InterviewerUploadController::class, 'destroy'])->name('interviewer.upload.destroy');
+    Route::get(
+        '/interviewer/taxpayers/{taxpayer}/taxpayeruploads',
+        [InterviewerUploadController::class, 'taxpayerindex']
+    )->name('interviewer.taxpayer.taxpayeruploads');
+
+    Route::post(
+        '/interviewer/taxpayers/{taxpayer}/taxpayeruploads',
+        [InterviewerUploadController::class, 'taxpayerindexstore']
+    )->name('interviewer.taxpayer.uploads.taxpayerstore');
+
+    Route::get(
+        '/interviewer/taxpayers/{taxpayer}/taxpayeruploads/{upload}/download',
+        [InterviewerUploadController::class, 'taxpayerDownload']
+    )->name('interviewer.taxpayer.uploads.download');
+
+    Route::delete(
+        '/interviewer/taxpayers/{taxpayer}/taxpayeruploads/{upload}',
+        [InterviewerUploadController::class, 'taxpayerDestroy']
+    )->name('interviewer.taxpayer.uploads.destroy');
+
 
     // Interviewer Schedule
     Route::get('/interviewer/schedule', [\App\Http\Controllers\InterviewerScheduleController::class, 'index'])->name('interviewer.schedule');
@@ -94,6 +119,8 @@ Route::middleware(['auth', 'role:interviewer'])->group(function () {
     Route::get('/interviewer/reports/{report}', [\App\Http\Controllers\InterviewerReportsController::class, 'show'])->name('interviewer.reports.show');
     Route::patch('/interviewer/reports/{report}', [\App\Http\Controllers\InterviewerReportsController::class, 'update'])->name('interviewer.reports.update');
 });
+
+
 Route::middleware(['auth', 'role:cashier'])->group(function () {
     Route::get('/cashier/dashboard', [CashierPaymentController::class, 'dashboard'])->name('cashier.dashboard');
     Route::get('/cashier/payments', [CashierPaymentController::class, 'viewPaymentHistory'])->name('cashier.payments.index');
@@ -103,6 +130,8 @@ Route::middleware(['auth', 'role:cashier'])->group(function () {
     Route::post('/cashier/payments/{payment}/refund', [CashierPaymentController::class, 'processRefunds'])->name('cashier.payments.refund');
     Route::get('/cashier/api/verify-taxpayer', [CashierPaymentController::class, 'verifyTaxpayer'])->name('cashier.taxpayers.verify');
 });
+
+
 Route::get('/dashboard', function () {
     $user = auth()->user();
 

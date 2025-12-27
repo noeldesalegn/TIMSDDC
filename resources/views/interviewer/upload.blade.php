@@ -14,43 +14,43 @@
         </template>
 
         <!-- Drop zone -->
-        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-            <div class="p-6">
-                <div @dragover.prevent @dragenter.prevent @drop.prevent="handleDrop($event)" class="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 border-gray-300 dark:border-gray-700">
-                    <p class="text-gray-700 dark:text-gray-300 mb-2">Drag & drop files here to upload</p>
-                    <p class="text-xs text-gray-500">Accepted: PDF, images, DOC/XLS, CSV, TXT (≤ 10MB each)</p>
-                    <input type="file" multiple class="hidden" x-ref="fileInput" @change="handleFiles($event.target.files)">
-                    <div class="mt-3">
-                        <button type="button" @click="$refs.fileInput.click()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded">Select Files</button>
-                    </div>
-                </div>
+{{--        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">--}}
+{{--            <div class="p-6">--}}
+{{--                <div @dragover.prevent @dragenter.prevent @drop.prevent="handleDrop($event)" class="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 border-gray-300 dark:border-gray-700">--}}
+{{--                    <p class="text-gray-700 dark:text-gray-300 mb-2">Drag & drop files here to upload</p>--}}
+{{--                    <p class="text-xs text-gray-500">Accepted: PDF, images, DOC/XLS, CSV, TXT (≤ 10MB each)</p>--}}
+{{--                    <input type="file" multiple class="hidden" x-ref="fileInput" @change="handleFiles($event.target.files)">--}}
+{{--                    <div class="mt-3">--}}
+{{--                        <button type="button" @click="$refs.fileInput.click()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded">Select Files</button>--}}
+{{--                    </div>--}}
+{{--                </div>--}}
 
-                <div class="mt-4">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Upload ZIP archive</label>
-                    <input type="file" accept=".zip" @change="setZip($event)" class="block w-full text-sm text-gray-700 dark:text-gray-300" />
-                </div>
+{{--                <div class="mt-4">--}}
+{{--                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Upload ZIP archive</label>--}}
+{{--                    <input type="file" accept=".zip" @change="setZip($event)" class="block w-full text-sm text-gray-700 dark:text-gray-300" />--}}
+{{--                </div>--}}
 
-                <div class="mt-6" x-show="queue.length">
-                    <h3 class="text-sm font-semibold mb-2">Queued Files (<span x-text="queue.length"></span>)</h3>
-                    <ul class="space-y-2">
-                        <template x-for="(f, idx) in queue" :key="idx">
-                            <li class="flex items-center justify-between p-3 rounded border border-gray-200 dark:border-gray-700">
-                                <div class="truncate"><span class="font-medium" x-text="f.name"></span> <span class="text-xs text-gray-500" x-text="human(f.size)"></span></div>
-                                <div class="w-1/3">
-                                    <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded">
-                                        <div class="h-2 bg-green-600 rounded" :style="`width:${progress[f.name]||0}%`"></div>
-                                    </div>
-                                </div>
-                            </li>
-                        </template>
-                    </ul>
-                    <div class="mt-3 flex gap-3">
-                        <button type="button" @click="startUpload()" :disabled="!online || uploading" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded disabled:opacity-50">Start Upload</button>
-                        <button type="button" @click="clearQueue()" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 rounded">Clear</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+{{--                <div class="mt-6" x-show="queue.length">--}}
+{{--                    <h3 class="text-sm font-semibold mb-2">Queued Files (<span x-text="queue.length"></span>)</h3>--}}
+{{--                    <ul class="space-y-2">--}}
+{{--                        <template x-for="(f, idx) in queue" :key="idx">--}}
+{{--                            <li class="flex items-center justify-between p-3 rounded border border-gray-200 dark:border-gray-700">--}}
+{{--                                <div class="truncate"><span class="font-medium" x-text="f.name"></span> <span class="text-xs text-gray-500" x-text="human(f.size)"></span></div>--}}
+{{--                                <div class="w-1/3">--}}
+{{--                                    <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded">--}}
+{{--                                        <div class="h-2 bg-green-600 rounded" :style="`width:${progress[f.name]||0}%`"></div>--}}
+{{--                                    </div>--}}
+{{--                                </div>--}}
+{{--                            </li>--}}
+{{--                        </template>--}}
+{{--                    </ul>--}}
+{{--                    <div class="mt-3 flex gap-3">--}}
+{{--                        <button type="button" @click="startUpload()" :disabled="!online || uploading" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded disabled:opacity-50">Start Upload</button>--}}
+{{--                        <button type="button" @click="clearQueue()" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 rounded">Clear</button>--}}
+{{--                    </div>--}}
+{{--                </div>--}}
+{{--            </div>--}}
+{{--        </div>--}}
 
         <!-- Filters -->
         <form method="GET" class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
@@ -94,6 +94,19 @@
                             <p class="text-xs text-gray-500">{{ strtoupper($u->mime ?? 'file') }} • {{ number_format((int)$u->size/1024,0) }} KB</p>
                         </div>
                         @php $url = asset('storage/'.$u->path); @endphp
+                        <p class="text-xs text-gray-600 dark:text-gray-400">
+                            Uploaded by:
+                            <span class="font-medium">
+                            {{ $u->uploader?->name ?? 'Unknown' }}
+                        </span>
+                        </p>
+
+                        <p class="text-xs text-gray-600 dark:text-gray-400">
+                            Taxpayer:
+                            <span class="font-medium">
+                            {{ $u->taxpayer?->name ?? 'N/A' }}
+                        </span>
+                        </p>
                         @if(isset($u->mime) && strpos($u->mime, 'image/') === 0)
                             <img src="{{ $url }}" alt="File preview" loading="lazy" width="640" height="320" class="w-full h-40 object-cover">
                         @elseif(($u->mime ?? '')==='application/pdf')
