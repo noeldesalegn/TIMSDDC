@@ -8,6 +8,7 @@ class InterviewerAppointment extends Model
 {
     protected $fillable = [
         'user_id',
+        'interviewer_id',
         'taxpayer_id',
         'title',
         'notes',

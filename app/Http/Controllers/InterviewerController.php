@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 
+use App\Models\InterviewerAppointment;
 use App\Models\InterviewerUpload;
 use App\Models\User;
 use Carbon\Carbon;
@@ -20,11 +21,18 @@ class InterviewerController extends Controller
             ->count();        $pendingUploads = request()->session()->get('pending_uploads', 0);
 
         // Get today's schedule
-        $todaySchedule = request()->session()->get('today_schedule', [
-            ['time' => '09:00', 'taxpayer' => 'John Doe', 'status' => 'Confirmed'],
-            ['time' => '10:30', 'taxpayer' => 'Jane Smith', 'status' => 'Pending'],
-            ['time' => '14:00', 'taxpayer' => 'Mike Johnson', 'status' => 'Confirmed'],
-        ]);
+//        $todaySchedule = request()->session()->get('today_schedule', [
+//            ['time' => '09:00', 'taxpayer' => 'John Doe', 'status' => 'Confirmed'],
+//            ['time' => '10:30', 'taxpayer' => 'Jane Smith', 'status' => 'Pending'],
+//            ['time' => '14:00', 'taxpayer' => 'Mike Johnson', 'status' => 'Confirmed'],
+//        ]);
+
+        $today = Carbon::today();
+        $todaySchedule = InterviewerAppointment::whereDate('start_at', $today)
+        ->where('interviewer_id', $user->id) ->with('taxpayer')
+        ->orderBy('start_at')->get()
+        ->map(function ($appointment) { return [ 'taxpayer' => $appointment->taxpayer->name ?? 'Unknown', 'time' => Carbon::parse($appointment->start_at)
+        ->format('g:i A'), 'status' => ucfirst($appointment->status), ]; });
 
         // Get recent uploads
         $recentUploads = request()->session()->get('recent_uploads', [

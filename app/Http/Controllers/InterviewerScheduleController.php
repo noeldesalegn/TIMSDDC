@@ -32,8 +32,8 @@ class InterviewerScheduleController extends Controller
             return [
                 'id' => $a->id,
                 'title' => $a->title,
-                'start' => $a->start_at->toIso8601String(),
-                'end' => $a->end_at->toIso8601String(),
+                'start' => $a->start_at->format('Y-m-d\TH:i:s'),
+                'end'   => $a->end_at->format('Y-m-d\TH:i:s'),
                 'extendedProps' => [
                     'status' => $a->status,
                     'location' => $a->location,
@@ -52,11 +52,12 @@ class InterviewerScheduleController extends Controller
     public function store(Request $request)
     {
         $user = $request->user();
+
         $data = $request->validate([
             'title' => ['required','string','max:255'],
             'notes' => ['nullable','string'],
-            'start_at' => ['required','date'],
-            'end_at' => ['required','date','after:start_at'],
+            'start_at' => ['required','date_format:Y-m-d\TH:i:s'],
+            'end_at' => ['required','date_format:Y-m-d\TH:i:s','after:start_at'],
             'taxpayer_id' => ['nullable','integer','exists:users,id'],
             'taxpayer_email' => ['nullable','email'],
             'location' => ['nullable','string','max:255'],
@@ -71,6 +72,7 @@ class InterviewerScheduleController extends Controller
 
         $appointment = InterviewerAppointment::create([
             'user_id' => $user->id,
+            'interviewer_id' => $user->id,
             'taxpayer_id' => $taxpayerId,
             'title' => $data['title'],
             'notes' => $data['notes'] ?? null,
@@ -81,7 +83,10 @@ class InterviewerScheduleController extends Controller
             'contact_phone' => $data['contact_phone'] ?? null,
         ]);
 
-        return response()->json(['ok' => true, 'id' => $appointment->id]);
+        return response()->json([
+            'success' => true,
+            'appointment' => $appointment
+        ]);
     }
 
     public function update(Request $request, InterviewerAppointment $appointment)

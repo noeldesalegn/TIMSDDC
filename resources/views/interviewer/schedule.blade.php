@@ -106,16 +106,42 @@
                     this.calendar = calendar;
                 },
                 resetForm(){ this.form = { title:'', start_at:'', end_at:'', taxpayer_email:'', location:'', contact_phone:'', notes:'' }; },
-                async create(){
-                    try{
-                        const res = await fetch('{{ route('interviewer.schedule.store') }}', {
-                            method:'POST', headers:{ 'Content-Type':'application/json', 'X-CSRF-TOKEN':'{{ csrf_token() }}' },
-                            body: JSON.stringify(this.form)
+                async create() {
+                    try {
+                        const formData = new FormData();
+                        Object.entries(this.form).forEach(([key, value]) => {
+                            if (value !== null && value !== '') {
+                                // Add seconds for datetime-local fields
+                                if (key === 'start_at' || key === 'end_at') {
+                                    formData.append(key, value.length === 16 ? `${value}:00` : value);
+                                } else {
+                                    formData.append(key, value);
+                                }
+                            }
                         });
-                        if (!res.ok) throw new Error('Create failed');
+
+                        const res = await fetch('{{ route('interviewer.schedule.store') }}', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json'
+                            },
+                            body: formData
+                        });
+
+                        const data = await res.json();
+
+                        if (!res.ok) {
+                            alert(JSON.stringify(data.errors ?? data, null, 2));
+                            return;
+                        }
+
                         this.resetForm();
                         this.calendar.refetchEvents();
-                    }catch(e){ alert('Failed to create appointment'); }
+                    } catch (e) {
+                        console.error(e);
+                        alert('Failed to create appointment');
+                    }
                 },
                 async updateEventTimes(event){
                     try{
