@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminInterviewerController;
 use App\Http\Controllers\AdminTaxpayerController;
 use App\Http\Controllers\InterviewerUploadController;
 use App\Http\Controllers\ProfileController;
@@ -60,6 +61,41 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         ->name('admin.tax.edit');
     Route::patch('/admin/tax/{summary}', [AdminTaxpayerController::class, 'updateTax'])
         ->name('admin.tax.update');
+    // Show create tax summary form for a taxpayer
+    Route::get(
+        '/admin/taxpayers/{user}/tax-summaries/create',
+        [AdminTaxpayerController::class, 'createTaxSummary']
+    )->name('admin.tax.create');
+
+// Store tax summary
+    Route::post(
+        '/admin/taxpayers/{user}/tax-summaries',
+        [AdminTaxpayerController::class, 'storeTaxSummary']
+    )->name('admin.tax.store');
+
+
+
+    //Admin interviewer management
+    Route::get('/interviewers', [AdminInterviewerController::class, 'index'])
+        ->name('admin.interviewers.index');
+
+    Route::get('/admin/uploads/{upload}/view', [AdminInterviewerController::class, 'viewUpload'])
+        ->name('admin.uploads.view');
+
+    Route::get('/interviewers/{interviewer}/edit', [AdminInterviewerController::class, 'edit'])
+        ->name('admin.interviewers.edit');
+
+    Route::put('/interviewers/{interviewer}', [AdminInterviewerController::class, 'update'])
+        ->name('admin.interviewers.update');
+
+    Route::delete('/interviewers/{interviewer}', [AdminInterviewerController::class, 'destroy'])
+        ->name('admin.interviewers.destroy');
+
+    Route::get('/interviewers/{interviewer}/uploads', [AdminInterviewerController::class, 'uploads'])
+        ->name('admin.interviewers.uploads');
+
+    Route::patch('/admin/interviewers/{interviewer}/enable', [AdminInterviewerController::class, 'enable'])
+        ->name('admin.interviewers.enable');
 
 });
 

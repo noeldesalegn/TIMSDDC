@@ -200,6 +200,40 @@ class AdminTaxpayerController extends Controller
     {
         return view('admin.tax.edit', compact('summary'));
     }
+    public function createTaxSummary(User $user)
+    {
+        abort_unless($user->role === 'taxpayer', 404);
+
+        return view('admin.tax.create', compact('user'));
+    }
+    public function storeTaxSummary(Request $request, User $user)
+    {
+        abort_unless($user->role === 'taxpayer', 404);
+
+        $data = $request->validate([
+            'tax_type' => 'required|in:Employment,Business,Rental',
+            'category' => 'nullable|in:A,B,C',
+            'tax_period' => 'required|string|max:255',
+        ]);
+
+        TaxSummary::create([
+            'taxpayer_id' => $user->id,
+            'tax_type' => $data['tax_type'],
+            'category' => $data['category'],
+            'tax_period' => $data['tax_period'],
+            'taxable_income' => 0,
+            'tax_rate' => 0,
+            'deductible' => 0,
+            'tax_amount' => 0,
+            'status' => 'pending',
+        ]);
+
+        return redirect()
+            ->route('admin.tax.index')
+            ->with('success', 'Tax summary created successfully.');
+    }
+
+
     public function verify(TaxSummary $summary)
     {
         // Optional: update status field

@@ -76,40 +76,108 @@
                                     {{ $u->email_verified_at ? 'Verified' : 'Unverified' }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">{{ optional($u->created_at)->format('M d, Y') }}</td>
-                            <td class="px-6 py-4 text-right text-sm">
-                                <a href="{{ route('admin.taxpayers.show', $u) }}" class="text-indigo-600 dark:text-indigo-400 hover:underline mr-3">View</a>
-                                <button type="button" class="text-gray-700 dark:text-gray-300 hover:underline" @click="document.getElementById('editModal-{{ $u->id }}').showModal()">Edit</button>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex flex-col">
+        <span class="text-sm font-medium text-gray-900 dark:text-gray-100">
+            {{ optional($u->created_at)->format('M d, Y') }}
+        </span>
+                                    <span class="text-xs text-gray-500">
+            {{ optional($u->created_at)->format('h:i A') }}
+        </span>
+                                </div>
+                            </td>
+
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <div class="flex justify-end items-center space-x-3">
+
+                                    <a href="{{ route('admin.taxpayers.show', $u) }}"
+                                       class="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200"
+                                       title="View Details">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                    </a>
+
+                                    <button type="button"
+                                            @click="document.getElementById('editModal-{{ $u->id }}').showModal()"
+                                            class="px-3 py-1 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition duration-200">
+                                        Edit
+                                    </button>
+
+                                    <a href="{{ route('admin.tax.create', $u) }}"
+                                       class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold uppercase tracking-widest rounded-lg shadow-sm hover:shadow-md transform active:scale-95 transition-all duration-150">
+                                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                        Create Summary
+                                    </a>
+                                </div>
                             </td>
                         </tr>
 
                         <!-- Edit Modal -->
-                        <dialog id="editModal-{{ $u->id }}" class="modal" role="dialog" aria-modal="true">
-                            <form method="POST" action="{{ route('admin.taxpayers.update', $u) }}" class="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-lg">
-                                @csrf
-                                @method('PATCH')
-                                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Edit Taxpayer</h3>
-                                <div class="space-y-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Name</label>
-                                        <input name="name" value="{{ $u->name }}" class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300" required autofocus />
+                        <dialog id="editModal-{{ $u->id }}"
+                                class="modal p-0 rounded-2xl bg-transparent backdrop:bg-gray-900/60 backdrop:backdrop-blur-sm"
+                                role="dialog"
+                                aria-modal="true">
+
+                            <div class="fixed inset-0 flex items-center justify-center p-4">
+                                <form method="POST" action="{{ route('admin.taxpayers.update', $u) }}"
+                                      class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-100 dark:border-gray-800 transform transition-all">
+                                    @csrf
+                                    @method('PATCH')
+
+                                    <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 flex justify-between items-center">
+                                        <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">Edit Taxpayer</h3>
+                                        <button type="button" onclick="this.closest('dialog').close()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        </button>
                                     </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
-                                        <input type="email" name="email" value="{{ $u->email }}" class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300" required />
+
+                                    <div class="p-6 space-y-5">
+                                        <div>
+                                            <label class="block text-xs font-bold uppercase tracking-wider text-black-500 dark:text-black-400 mb-2 ml-1">Full Name</label>
+                                            <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                        </span>
+                                                <input name="name" value="{{ $u->name }}"
+                                                       class="w-full pl-10 rounded-xl border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
+                                                       placeholder="John Doe" required autofocus />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-xs font-bold uppercase tracking-wider text-black-500 dark:text-black-400 mb-2 ml-1">Email Address</label>
+                                            <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        </span>
+                                                <input type="email" name="email" value="{{ $u->email }}"
+                                                       class="w-full pl-10 rounded-xl border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
+                                                       placeholder="john@example.com" required />
+                                            </div>
+                                        </div>
+
+                                        <div class="flex items-center p-3 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-100 dark:border-gray-700">
+                                            <input type="checkbox" id="verify-{{ $u->id }}" name="verify" value="1"
+                                                   class="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" {{ $u->email_verified_at ? 'checked' : '' }}>
+                                            <label for="verify-{{ $u->id }}" class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                Mark user as verified
+                                                <span class="block text-xs text-gray-400 font-normal">This bypasses the email verification link.</span>
+                                            </label>
+                                        </div>
                                     </div>
-                                    <div class="flex items-center gap-2">
-                                        <input type="checkbox" id="verify-{{ $u->id }}" name="verify" value="1" {{ $u->email_verified_at ? 'checked' : '' }}>
-                                        <label for="verify-{{ $u->id }}" class="text-sm text-gray-700 dark:text-gray-300">Mark as verified</label>
+
+                                    <div class="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 flex gap-3 justify-end border-t border-gray-100 dark:border-gray-800">
+                                        <button type="button" onclick="this.closest('dialog').close()"
+                                                class="px-5 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition duration-200">
+                                            Cancel
+                                        </button>
+                                        <button type="submit"
+                                                class="px-6 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-lg shadow-indigo-500/30 transition-all duration-200 active:scale-95">
+                                            Save Changes
+                                        </button>
                                     </div>
-                                </div>
-                                <div class="mt-6 flex gap-3 justify-end">
-                                    <button type="button" onclick="this.closest('dialog').close()" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-lg">Cancel</button>
-                                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">Save</button>
-                                </div>
-                            </form>
-                        </dialog>
-                        @endforeach
+                                </form>
+                            </div>
+                        </dialog>                        @endforeach
                     </tbody>
                 </table>
                 <div class="mt-4">{{ $taxpayers->links() }}</div>

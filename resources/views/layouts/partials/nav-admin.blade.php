@@ -4,6 +4,7 @@
     $linkActive = 'bg-indigo-50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-600';
     $isDashboard = request()->routeIs('admin.dashboard');
     $isTaxpayers = request()->routeIs('admin.taxpayers.index');
+    $isIninterviewers = request()->routeIs('admin.interviewers.index');
     $isTaxpayerPayments = request()->routeIs('admin.taxpayers.payments');
     $isNews = request()->routeIs('admin.news.*');
     $isReports = request()->routeIs('admin.reports.*');
@@ -20,7 +21,7 @@
        class="{{ $linkBase }} {{ $isTaxpayerPayments ? $linkActive : $linkIdle }}">
         <span>Taxpayer Payments</span>
     </a>
-    <a href="#" class="{{ $linkBase }} {{ $linkIdle }}">
+    <a href="{{ route('admin.interviewers.index') }}" class="{{ $linkBase }} {{ $isIninterviewers ? $linkActive : $linkIdle }}" @if($isIninterviewers) aria-current="page" @endif>
         <span>Manage Interviewers</span>
     </a>
     <a href="{{ route('admin.news.index') }}" class="{{ $linkBase }} {{ $isNews ? $linkActive : $linkIdle }}" @if($isNews) aria-current="page" @endif>
