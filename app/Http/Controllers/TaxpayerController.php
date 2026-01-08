@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use App\Models\News;
 use App\Models\Complaint;
@@ -319,5 +320,46 @@ class TaxpayerController extends Controller
         'due_date' => now()->addDays(30)->toDateString(),
     ];
 }
+    public function tinForm()
+    {
+        $user = auth()->user();
 
+        // Redirect if already approved
+        if ($user->tin_status === 'approved') {
+            return redirect()->route('taxpayer.dashboard');
+        }
+
+        return view('taxpayer.tin', compact('user'));
+    }
+
+    public function tinSubmit(Request $request)
+    {
+        $user = auth()->user();
+
+        $data = $request->validate([
+            'tin' => ['required', 'string', 'max:50', 'unique:users,tin,' . $user->id],
+            'tin_document' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
+        ]);
+
+        // Delete old document if exists
+        if ($user->tin_document) {
+            Storage::disk('public')->delete($user->tin_document);
+        }
+
+        $path = $request->file('tin_document')
+            ->store('tin_documents', 'public');
+
+        $user->update([
+            'tin' => $data['tin'],
+            'tin_document' => $path,
+            'tin_status' => 'pending',
+            'tin_verified_at' => null,
+            'tin_verified_by' => null,
+            'tin_rejection_reason' => null,
+        ]);
+
+        return redirect()
+            ->route('taxpayer.tin.form')
+            ->with('success', 'TIN submitted successfully. Awaiting admin approval.');
+    }
 }

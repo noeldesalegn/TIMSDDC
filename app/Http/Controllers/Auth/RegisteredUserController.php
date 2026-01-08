@@ -31,31 +31,35 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+
+            // TIN fields
+            'tin' => ['nullable', 'string', 'max:50', 'unique:users,tin'],
+            'tin_document' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
+            'tin_status' => 'pending',
         ]);
+
+        // Upload TIN document
+        $tinPath = null;
+        if ($request->hasFile('tin_document')) {
+            $tinPath = $request->file('tin_document')
+                ->store('tin_documents', 'public');
+        }
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'taxpayer', // Set default role
+            'role' => 'taxpayer',
+
+            'tin' => $request->tin,
+            'tin_document' => $tinPath,
         ]);
 
         event(new Registered($user));
-
         Auth::login($user);
 
-        if ($user->role === 'admin') {
-            return redirect()->route('admin.dashboard');
-        } elseif ($user->role === 'taxpayer') {
-            return redirect()->route('taxpayer.dashboard');
-        } elseif ($user->role === 'interviewer') {
-            return redirect()->route('interviewer.dashboard');
-        } elseif ($user->role === 'cashier') {
-            return redirect()->route('cashier.dashboard');
-        }
-
-        return redirect(route('dashboard', absolute: false));
+        return redirect()->route('taxpayer.dashboard');
     }
 }

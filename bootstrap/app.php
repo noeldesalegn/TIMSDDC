@@ -17,7 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
     // Register route middleware (like old $routeMiddleware)
     $middleware->alias([
         'role' => \App\Http\Middleware\RoleMiddleware::class,
+        'tin.approved' => \App\Http\Middleware\EnsureTinApproved::class,
     ]);
+
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

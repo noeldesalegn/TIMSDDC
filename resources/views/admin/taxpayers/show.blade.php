@@ -1,147 +1,201 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Taxpayer Profile</h2>
-            <a href="{{ route('admin.taxpayers.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 font-semibold rounded-lg transition">Back</a>
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200">
+                Taxpayer Profile
+            </h2>
+            <a href="{{ route('admin.taxpayers.index') }}"
+               class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600">
+                Back
+            </a>
         </div>
     </x-slot>
 
     <div class="space-y-6">
-        <!-- Profile Card -->
-        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-            <div class="p-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="md:col-span-2">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">{{ $user->name }}</h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ $user->email }}</p>
-                        <p class="text-sm mt-2">
-                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $user->email_verified_at ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' }}">
-                                {{ $user->email_verified_at ? 'Verified' : 'Unverified' }}
-                            </span>
-                        </p>
-                    </div>
-                    <div class="space-y-3">
-                        <div class="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-                            <p class="text-xs text-blue-700 dark:text-blue-300">User ID</p>
-                            <p class="text-sm font-semibold text-blue-900 dark:text-blue-100">#{{ $user->id }}</p>
-                        </div>
-                        <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-700">
-                            <p class="text-xs text-gray-600 dark:text-gray-400">Joined</p>
-                            <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ optional($user->created_at)->format('M d, Y') }}</p>
-                        </div>
+
+        {{-- ================= PROFILE CARD ================= --}}
+        <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+            <div class="grid md:grid-cols-3 gap-6">
+
+                <div class="md:col-span-2">
+                    <h3 class="text-lg font-semibold">{{ $user->name }}</h3>
+                    <p class="text-sm text-gray-500">{{ $user->email }}</p>
+
+                    <div class="mt-3">
+                        <span class="px-2 py-1 text-xs rounded-full
+                            {{ $user->email_verified_at
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-yellow-100 text-yellow-800' }}">
+                            {{ $user->email_verified_at ? 'Verified' : 'Unverified' }}
+                        </span>
                     </div>
                 </div>
+
+                <div class="space-y-3">
+                    <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded">
+                        <p class="text-xs text-gray-500">User ID</p>
+                        <p class="font-semibold">#{{ $user->id }}</p>
+                    </div>
+
+                    <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded">
+                        <p class="text-xs text-gray-500">Joined</p>
+                        <p class="font-semibold">{{ $user->created_at->format('M d, Y') }}</p>
+                    </div>
+                </div>
+
             </div>
         </div>
 
-        <!-- History Tabs -->
-        <div x-data="{tab: 'payments'}" class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-            <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-                <nav class="flex gap-4">
-                    <button @click="tab='payments'" :class="tab==='payments' ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-gray-600 dark:text-gray-400'">Payments</button>
-                    <button @click="tab='tax'" :class="tab==='tax' ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-gray-600 dark:text-gray-400'">Tax Summaries</button>
-                    <button @click="tab='complaints'" :class="tab==='complaints' ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-gray-600 dark:text-gray-400'">Complaints</button>
-                </nav>
+        {{-- ================= TIN SECTION ================= --}}
+        <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+            <h3 class="text-lg font-semibold mb-4">TIN Information</h3>
+
+            <div class="grid md:grid-cols-2 gap-6">
+
+                {{-- TIN DETAILS --}}
+                <div class="space-y-2">
+                    <p><strong>TIN Number:</strong> {{ $user->tin ?? '—' }}</p>
+
+                    <p>
+                        <strong>Status:</strong>
+                        <span class="px-2 py-1 text-xs rounded-full
+                            @if($user->tin_status === 'approved') bg-green-100 text-green-800
+                            @elseif($user->tin_status === 'rejected') bg-red-100 text-red-800
+                            @else bg-yellow-100 text-yellow-800
+                            @endif">
+                            {{ ucfirst($user->tin_status ?? 'pending') }}
+                        </span>
+                    </p>
+                </div>
+
+                {{-- TIN DOCUMENT --}}
+                <div>
+                    @if($user->tin_document)
+                        <button
+                            onclick="document.getElementById('tinModal').showModal()"
+                            class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+                            Preview TIN Document
+                        </button>
+                    @else
+                        <p class="text-gray-500 text-sm">No TIN document uploaded.</p>
+                    @endif
+                </div>
             </div>
+
+            {{-- ADMIN ACTIONS --}}
+            @if($user->tin_status !== 'approved')
+                <div class="mt-6 flex gap-3">
+
+                    <form method="POST" action="{{ route('admin.taxpayers.tin.approve', $user) }}">
+                        @csrf
+                        @method('PATCH')
+                        <button class="px-5 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                            Approve TIN
+                        </button>
+                    </form>
+
+                    <form method="POST" action="{{ route('admin.taxpayers.tin.reject', $user) }}">
+                        @csrf
+                        @method('PATCH')
+                        <button class="px-5 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                            Reject TIN
+                        </button>
+                    </form>
+
+                </div>
+            @endif
+        </div>
+
+        {{-- ================= HISTORY TABS ================= --}}
+        <div x-data="{tab:'payments'}" class="bg-white dark:bg-gray-800 shadow rounded-lg">
+
+            <div class="border-b p-4 flex gap-4">
+                <button @click="tab='payments'" :class="tab==='payments' ? 'font-bold text-indigo-600' : ''">Payments</button>
+                <button @click="tab='tax'" :class="tab==='tax' ? 'font-bold text-indigo-600' : ''">Tax Summaries</button>
+                <button @click="tab='complaints'" :class="tab==='complaints' ? 'font-bold text-indigo-600' : ''">Complaints</button>
+            </div>
+
             <div class="p-6">
+
+                {{-- PAYMENTS --}}
                 <div x-show="tab==='payments'">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Payment History</h3>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                            <thead class="bg-gray-50 dark:bg-gray-700/50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Amount</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                @foreach ($payments as $p)
-                                <tr>
-                                    <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">{{ optional($p->created_at)->format('M d, Y') }}</td>
-                                    <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">ETB {{ number_format((float)$p->amount, 2) }}</td>
-                                    <td class="px-6 py-4">
-                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $p->status==='completed' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' }}">
-                                            {{ ucfirst($p->status) }}
-                                        </span>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                    <table class="w-full text-sm">
+                        <thead>
+                        <tr class="text-left text-gray-500">
+                            <th>Date</th><th>Amount</th><th>Status</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach($payments as $p)
+                            <tr class="border-t">
+                                <td>{{ $p->created_at->format('M d, Y') }}</td>
+                                <td>ETB {{ number_format($p->amount,2) }}</td>
+                                <td>{{ ucfirst($p->status) }}</td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
                     <div class="mt-4">{{ $payments->links() }}</div>
                 </div>
 
+                {{-- TAX SUMMARIES --}}
                 <div x-show="tab==='tax'">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Tax Summaries</h3>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                            <thead class="bg-gray-50 dark:bg-gray-700/50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Period</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Type</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Amount</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                @foreach ($summaries as $s)
-                                <tr>
-                                    <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">{{ $s->tax_period ?? optional($s->created_at)->format('Y-m') }}</td>
-                                    <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">{{ $s->tax_type }}</td>
-                                    <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">ETB {{ number_format((float)$s->tax_amount, 2) }}</td>
-                                    <td class="px-6 py-4">
-                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
-                                            @if($s->status==='paid') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
-                                            @elseif($s->status==='pending') bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
-                                            @else bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
-                                            @endif">
-                                            {{ ucfirst($s->status) }}
-                                        </span>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                    <table class="w-full text-sm">
+                        <thead>
+                        <tr class="text-left text-gray-500">
+                            <th>Period</th><th>Type</th><th>Amount</th><th>Status</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach($summaries as $s)
+                            <tr class="border-t">
+                                <td>{{ $s->tax_period }}</td>
+                                <td>{{ $s->tax_type }}</td>
+                                <td>ETB {{ number_format($s->tax_amount,2) }}</td>
+                                <td>{{ ucfirst($s->status) }}</td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
                     <div class="mt-4">{{ $summaries->links() }}</div>
                 </div>
 
+                {{-- COMPLAINTS --}}
                 <div x-show="tab==='complaints'">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Complaints</h3>
-                    <div class="space-y-4">
-                        @foreach ($complaints as $c)
-                        <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                            <div class="flex items-start justify-between">
-                                <div>
-                                    <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $c->subject }}</p>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ optional($c->created_at)->format('M d, Y h:i A') }}</p>
-                                </div>
-                                <span class="px-2 py-1 text-xs font-semibold rounded-full
-                                    @if($c->status==='submitted') bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
-                                    @elseif($c->status==='in_progress') bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
-                                    @else bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
-                                    @endif">
-                                    {{ ucfirst(str_replace('_',' ',$c->status)) }}
-                                </span>
-                            </div>
-                            <p class="text-sm mt-3 text-gray-700 dark:text-gray-300">{{ $c->message }}</p>
-                            @if($c->response)
-                                <div class="mt-3 p-3 rounded bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-                                    <p class="text-xs text-blue-700 dark:text-blue-300">Response</p>
-                                    <p class="text-sm text-blue-900 dark:text-blue-100">{{ $c->response }}</p>
-                                </div>
-                            @endif
-                            <div class="mt-3">
-                                <a href="{{ route('admin.complaints.show', $c) }}" class="text-indigo-600 dark:text-indigo-400 hover:underline">Open</a>
-                            </div>
+                    @foreach($complaints as $c)
+                        <div class="border rounded p-4 mb-4">
+                            <p class="font-semibold">{{ $c->subject }}</p>
+                            <p class="text-xs text-gray-500">{{ $c->created_at->format('M d, Y') }}</p>
+                            <p class="mt-2">{{ $c->message }}</p>
                         </div>
-                        @endforeach
-                    </div>
-                    <div class="mt-4">{{ $complaints->links() }}</div>
+                    @endforeach
+                    {{ $complaints->links() }}
                 </div>
+
             </div>
         </div>
+
     </div>
+
+    {{-- ================= TIN PREVIEW MODAL ================= --}}
+    <dialog id="tinModal" class="rounded-xl w-full max-w-3xl backdrop:bg-black/60">
+        <div class="p-4 bg-white dark:bg-gray-900 rounded-xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-semibold text-lg">TIN Document</h3>
+                <button onclick="tinModal.close()">✕</button>
+            </div>
+
+            @php
+                $ext = pathinfo($user->tin_document, PATHINFO_EXTENSION);
+            @endphp
+
+            @if(in_array(strtolower($ext), ['jpg','jpeg','png']))
+                <img src="{{ asset('storage/'.$user->tin_document) }}" class="w-full rounded">
+            @else
+                <iframe src="{{ asset('storage/'.$user->tin_document) }}"
+                        class="w-full h-[70vh] rounded"></iframe>
+            @endif
+        </div>
+    </dialog>
+
 </x-app-layout>

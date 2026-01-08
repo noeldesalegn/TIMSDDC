@@ -70,6 +70,19 @@ class AdminTaxpayerController extends Controller
 
         return back()->with('success', 'Taxpayer updated successfully.');
     }
+    public function approveTin(User $user)
+    {
+        $user->update(['tin_status' => 'approved',
+            'tin_verified_at' => now(),
+            'tin_verified_by' => auth()->id(),]);
+        return back()->with('success', 'TIN approved');
+    }
+
+    public function rejectTin(User $user)
+    {
+        $user->update(['tin_status' => 'rejected']);
+        return back()->with('success', 'TIN rejected');
+    }
 
     public function bulkVerify(Request $request)
     {

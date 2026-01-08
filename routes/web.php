@@ -29,6 +29,14 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/taxpayers/{user}', [AdminTaxpayerController::class, 'show'])->name('admin.taxpayers.show');
     Route::patch('/admin/taxpayers/{user}', [AdminTaxpayerController::class, 'update'])->name('admin.taxpayers.update');
     Route::post('/admin/taxpayers/payments/{id}/verify', [AdminTaxpayerController::class, 'verifyPayment'])->name('admin.taxpayers.payments.verify');
+    Route::patch('/admin/taxpayers/{user}/tin/approve',
+        [AdminTaxpayerController::class, 'approveTin']
+    )->name('admin.taxpayers.tin.approve');
+
+    Route::patch('/admin/taxpayers/{user}/tin/reject',
+        [AdminTaxpayerController::class, 'rejectTin']
+    )->name('admin.taxpayers.tin.reject');
+
     Route::post('/admin/taxpayers/payments/{id}/reject', [AdminTaxpayerController::class, 'rejectPayment'])->name('admin.taxpayers.payments.reject');
 
     // Admin News
@@ -100,7 +108,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 });
 
 
-Route::middleware(['auth', 'role:taxpayer'])->group(function () {
+Route::middleware(['auth', 'role:taxpayer', 'tin.approved'])->group(function () {
     Route::get('/taxpayer/dashboard', [TaxpayerController::class, 'index'])->name('taxpayer.dashboard');
     Route::get('/taxpayer/summary', [TaxpayerController::class, 'summary'])->name('taxpayer.summary');
     Route::get('/taxpayer/payment', [TaxpayerController::class, 'paymentForm'])->name('taxpayer.payment');
@@ -110,6 +118,12 @@ Route::middleware(['auth', 'role:taxpayer'])->group(function () {
     Route::get('/taxpayer/news', [TaxpayerController::class, 'news'])->name('taxpayer.news');
     Route::post('/taxpayer/news/{newsId}/comments', [TaxpayerController::class, 'submitComment'])->name('taxpayer.news.comment');
 });
+Route::middleware(['auth', 'role:taxpayer'])->group(function () {
+    Route::get('/taxpayer/tin', [TaxpayerController::class, 'tinForm'])->name('taxpayer.tin.form');
+    Route::post('/taxpayer/tin', [TaxpayerController::class, 'tinSubmit'])->name('taxpayer.tin.submit');
+});
+
+
 
 
 Route::middleware(['auth', 'role:interviewer'])->group(function () {
