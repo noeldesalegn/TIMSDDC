@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\UserRegistrationController;
 use App\Http\Controllers\AdminInterviewerController;
 use App\Http\Controllers\AdminTaxpayerController;
 use App\Http\Controllers\InterviewerUploadController;
@@ -21,6 +22,11 @@ Route::middleware('auth')->group(function () {
 });
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin/users/create', [UserRegistrationController::class, 'create'])
+        ->name('admin.users.create');
+
+    Route::post('/admin/users', [UserRegistrationController::class, 'store'])
+        ->name('admin.users.store');
     // Admin Taxpayers
     Route::get('/admin/taxpayers', [AdminTaxpayerController::class, 'index'])->name('admin.taxpayers.index');
     Route::get('/admin/taxpayers/export', [AdminTaxpayerController::class, 'export'])->name('admin.taxpayers.export');

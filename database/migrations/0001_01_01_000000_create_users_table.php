@@ -25,6 +25,8 @@ return new class extends Migration
             $table->string('tin')->nullable()->unique();
             $table->string('tin_document')->nullable(); // PDF or Image path
 
+            $table->string('status')->default('active'); // active, inactive, suspended
+
             $table->rememberToken();
             $table->timestamps();
         });

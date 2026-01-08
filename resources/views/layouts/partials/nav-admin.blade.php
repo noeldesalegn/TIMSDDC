@@ -9,6 +9,7 @@
     $isNews = request()->routeIs('admin.news.*');
     $isReports = request()->routeIs('admin.reports.*');
     $isComplaints = request()->routeIs('admin.complaints.*');
+    $isAdminUsers = request()->routeIs('admin.users.*');
 @endphp
 <nav class="space-y-1">
     <a href="{{ route('admin.dashboard') }}" class="{{ $linkBase }} {{ $isDashboard ? $linkActive : $linkIdle }}" @if($isDashboard) aria-current="page" @endif>
@@ -35,5 +36,8 @@
     </a>
     <a href="{{ route('admin.complaints.index') }}" class="{{ $linkBase }} {{ $isComplaints ? $linkActive : $linkIdle }}" @if($isComplaints) aria-current="page" @endif>
         <span>Complaints & Comments</span>
+    </a>
+    <a href="{{ route('admin.users.create') }}" class="{{ $linkBase }} {{ $isAdminUsers ? $linkActive : $linkIdle }}" @if($isAdminUsers) aria-current="page" @endif>
+        <span>Create user</span>
     </a>
 </nav>
