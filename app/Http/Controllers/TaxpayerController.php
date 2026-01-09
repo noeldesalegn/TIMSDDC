@@ -28,8 +28,18 @@ class TaxpayerController extends Controller
                     'amount' => $payment->amount,
                     'date' => $payment->created_at->toDateString(),
                     'status' => ucfirst($payment->status),
+                    'verification_status' => ucfirst($payment->verification_status ?? 'pending'),
                 ];
             });
+
+        // Calculate payment status counts
+        $paymentStatusCounts = [
+            'total' => $user->payments()->count(),
+            'pending' => $user->payments()->where('verification_status', 'pending')->count(),
+            'verified' => $user->payments()->where('verification_status', 'verified')->count(),
+            'rejected' => $user->payments()->where('verification_status', 'rejected')->count(),
+            'completed' => $user->payments()->where('status', 'completed')->count(),
+        ];
 
         // Get recent news from database
         $recentNews = News::orderBy('created_at', 'desc')
@@ -48,13 +58,14 @@ class TaxpayerController extends Controller
         // Fallback if no data
         if ($paymentHistory->isEmpty()) {
             $paymentHistory = collect([
-                ['amount' => 0, 'date' => now()->toDateString(), 'status' => 'No payments'],
+                ['amount' => 0, 'date' => now()->toDateString(), 'status' => 'No payments', 'verification_status' => 'N/A'],
             ]);
         }
 
         return view('taxpayer.dashboard', [
             'taxSummary' => $summary,
             'paymentHistory' => $paymentHistory,
+            'paymentStatusCounts' => $paymentStatusCounts,
             'recentNews' => $recentNews,
         ]);
     }

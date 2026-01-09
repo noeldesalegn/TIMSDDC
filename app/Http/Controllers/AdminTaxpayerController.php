@@ -8,7 +8,9 @@ use App\Models\Payment;
 use App\Models\Complaint;
 use App\Models\TaxSummary;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use App\Mail\PaymentStatusMail;
 
 class AdminTaxpayerController extends Controller
 {
@@ -152,10 +154,15 @@ class AdminTaxpayerController extends Controller
         $payment = Payment::findOrFail($id);
         $payment->update([
             'verification_status' => 'verified',
-            'status' => 'paid',
+            'status' => 'completed',
             'verified_at' => now(),
             'verified_by' => Auth::id(),
         ]);
+
+        // Send email notification to taxpayer
+        if ($payment->user && $payment->user->email) {
+            Mail::to($payment->user->email)->send(new PaymentStatusMail($payment, 'verified'));
+        }
 
         return back()->with('success', 'Payment verified successfully and marked as paid.');
     }
@@ -169,6 +176,11 @@ class AdminTaxpayerController extends Controller
             'verified_at' => now(),
             'verified_by' => Auth::id(),
         ]);
+
+        // Send email notification to taxpayer
+        if ($payment->user && $payment->user->email) {
+            Mail::to($payment->user->email)->send(new PaymentStatusMail($payment, 'rejected'));
+        }
 
         return back()->with('error', 'Payment rejected.');
     }

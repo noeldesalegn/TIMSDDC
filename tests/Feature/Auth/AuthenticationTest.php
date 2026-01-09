@@ -39,3 +39,47 @@ test('users can logout', function () {
     $this->assertGuest();
     $response->assertRedirect('/');
 });
+
+test('inactive interviewer cannot login', function () {
+    $user = User::factory()->create([
+        'role' => 'interviewer',
+        'status' => 'inactive',
+    ]);
+
+    $response = $this->post('/login', [
+        'email' => $user->email,
+        'password' => 'password',
+    ]);
+
+    $this->assertGuest();
+    $response->assertSessionHasErrors('email');
+});
+
+test('inactive cashier cannot login', function () {
+    $user = User::factory()->create([
+        'role' => 'cashier',
+        'status' => 'inactive',
+    ]);
+
+    $response = $this->post('/login', [
+        'email' => $user->email,
+        'password' => 'password',
+    ]);
+
+    $this->assertGuest();
+    $response->assertSessionHasErrors('email');
+});
+
+test('active interviewer can login', function () {
+    $user = User::factory()->create([
+        'role' => 'interviewer',
+        'status' => 'active',
+    ]);
+
+    $response = $this->post('/login', [
+        'email' => $user->email,
+        'password' => 'password',
+    ]);
+
+    $this->assertAuthenticated();
+});
