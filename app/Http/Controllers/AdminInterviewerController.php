@@ -10,13 +10,38 @@ use Illuminate\Support\Facades\Storage;
 
 class AdminInterviewerController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $interviewers = User::where('role', 'interviewer')
-            ->withCount('uploads')
-            ->get();
+        $query = User::where('role', 'interviewer');
 
-        return view('admin.interviewers.index', compact('interviewers'));
+        // Search by name or email
+        if ($search = $request->query('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by status
+        if ($status = $request->query('status')) {
+            if ($status !== 'all') {
+                $query->where('status', $status);
+            }
+        }
+
+        $interviewers = $query->withCount('uploads')
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        // Get stats
+        $stats = [
+            'total' => User::where('role', 'interviewer')->count(),
+            'active' => User::where('role', 'interviewer')->where('status', 'active')->count(),
+            'inactive' => User::where('role', 'interviewer')->where('status', 'inactive')->count(),
+        ];
+
+        return view('admin.interviewers.index', compact('interviewers', 'stats'));
     }
 
     public function uploads(User $interviewer)

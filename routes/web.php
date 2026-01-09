@@ -111,6 +111,16 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::patch('/admin/interviewers/{interviewer}/enable', [AdminInterviewerController::class, 'enable'])
         ->name('admin.interviewers.enable');
 
+    // Admin Cashier Management
+    Route::get('/admin/cashiers', [\App\Http\Controllers\AdminCashierController::class, 'index'])
+        ->name('admin.cashiers.index');
+    Route::get('/admin/cashiers/{cashier}', [\App\Http\Controllers\AdminCashierController::class, 'show'])
+        ->name('admin.cashiers.show');
+    Route::delete('/admin/cashiers/{cashier}', [\App\Http\Controllers\AdminCashierController::class, 'destroy'])
+        ->name('admin.cashiers.destroy');
+    Route::patch('/admin/cashiers/{cashier}/enable', [\App\Http\Controllers\AdminCashierController::class, 'enable'])
+        ->name('admin.cashiers.enable');
+
 });
 
 
