@@ -3,7 +3,12 @@
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Payment Receipts</h2>
     </x-slot>
 
-    <div class="py-6">
+    <div class="py-6" id="payments-table"
+         hx-get="{{ request()->fullUrl() }}"
+         hx-trigger="every 15s"
+         hx-select="#payments-table"
+         hx-target="#payments-table"
+         hx-swap="outerHTML">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             @if (session('success'))
                 <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg">{{ session('success') }}</div>

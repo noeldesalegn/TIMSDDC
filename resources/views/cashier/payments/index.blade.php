@@ -62,7 +62,12 @@
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg" id="payment-history"
+                 hx-get="{{ request()->fullUrl() }}"
+                 hx-trigger="every 15s"
+                 hx-select="#payment-history"
+                 hx-target="#payment-history"
+                 hx-swap="outerHTML">
                 <div class="p-6">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Payment History</h3>

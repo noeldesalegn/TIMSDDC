@@ -5,7 +5,12 @@
         </h2>
     </x-slot>
 
-    <div class="py-6">
+    <div class="py-6" id="dashboard-content" 
+         hx-get="{{ route('admin.dashboard') }}" 
+         hx-trigger="every 10s" 
+         hx-select="#dashboard-content" 
+         hx-target="#dashboard-content" 
+         hx-swap="outerHTML">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
             <!-- Top Stats -->

@@ -7,7 +7,12 @@
 
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="cashier-stats"
+                 hx-get="{{ request()->fullUrl() }}"
+                 hx-trigger="every 15s"
+                 hx-select="#cashier-stats"
+                 hx-target="#cashier-stats"
+                 hx-swap="outerHTML">
                 <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white p-6 rounded-lg shadow">
                     <p class="text-sm opacity-90 mb-2">Total Processed Today</p>
                     <p class="text-3xl font-bold">ETB {{ number_format($totalProcessedToday, 2) }}</p>
