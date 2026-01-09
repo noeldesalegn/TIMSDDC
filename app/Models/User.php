@@ -21,8 +21,22 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    protected $guarded = [
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'role',
+        'phone',
+        'address',
+        'tin',        'tin_status',        'tin_verified_at',        'tin_document',        'tin_rejection_reason',        'status',    ];
 
+    /**
+     * The attributes that are guarded.
+     *
+     * @var list<string>
+     */
+    protected $guarded = [
+        'id',
     ];
 
 
