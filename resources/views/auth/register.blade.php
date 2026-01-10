@@ -27,7 +27,7 @@
                 type="file"
                 name="tin_document"
                 accept=".pdf,.jpg,.jpeg,.png"
-                class="block w-full mt-1 text-sm"
+                class="block w-full mt-1 text-sm text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-sky-500 file:text-slate-950 hover:file:bg-sky-400"
             />
         </div>
 
