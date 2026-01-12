@@ -46,4 +46,8 @@ class AdminController extends Controller
     }
 
 
+    public function notifications()
+    {
+        return view('layouts.partials.admin-notifications');
+    }
 }

@@ -121,6 +121,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::patch('/admin/cashiers/{cashier}/enable', [\App\Http\Controllers\AdminCashierController::class, 'enable'])
         ->name('admin.cashiers.enable');
 
+    Route::get('/admin/notifications/poll', [AdminController::class, 'notifications'])->name('admin.notifications.poll');
 });
 
 
