@@ -17,7 +17,7 @@
     <a href="{{ route('interviewer.schedule') }}" class="{{ $linkBase }} {{ $isSchedule ? $linkActive : $linkIdle }}" @if($isSchedule) aria-current="page" @endif>
         <span>My Schedule</span>
     </a>
-    <a href="{{ route('interviewer.reports') }}" class="{{ $linkBase }} {{ $isReports ? $linkActive : $linkIdle }}" @if($isReports) aria-current="page" @endif>
+    <!-- <a href="{{ route('interviewer.reports') }}" class="{{ $linkBase }} {{ $isReports ? $linkActive : $linkIdle }}" @if($isReports) aria-current="page" @endif>
         <span>Generate Reports</span>
-    </a>
+    </a> -->
 </nav>

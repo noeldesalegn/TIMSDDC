@@ -152,15 +152,43 @@
                     }catch(e){ console.error(e); }
                 },
                 async openEventMenu(event){
-                    const action = prompt('Type: cancel, complete, or edit title', '');
-                    if (!action) return;
-                    if (action==='cancel' || action==='complete'){
-                        const status = action==='cancel' ? 'cancelled' : 'completed';
-                        await fetch(`{{ url('/interviewer/schedule') }}/${event.id}`, { method:'PATCH', headers:{ 'Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}' }, body: JSON.stringify({ status }) });
-                        this.calendar.refetchEvents();
-                    } else {
-                        await fetch(`{{ url('/interviewer/schedule') }}/${event.id}`, { method:'PATCH', headers:{ 'Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}' }, body: JSON.stringify({ title: action }) });
-                        this.calendar.refetchEvents();
+                    const rawAction = prompt('Type: cancel, complete, or edit title', '');
+                    if (!rawAction) return;
+
+                    const action = rawAction.toLowerCase().trim();
+
+                    try {
+                        if (action === 'cancel' || action === 'complete'){
+                            const status = action === 'cancel' ? 'cancelled' : 'completed';
+                            const res = await fetch(`{{ url('/interviewer/schedule') }}/${event.id}`, {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                                body: JSON.stringify({ status })
+                            });
+
+                            if (!res.ok) {
+                                alert('Failed to update status');
+                                return;
+                            }
+
+                            this.calendar.refetchEvents();
+                        } else {
+                            // Assume it's a title edit if not a command
+                            const res = await fetch(`{{ url('/interviewer/schedule') }}/${event.id}`, {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                                body: JSON.stringify({ title: rawAction })
+                            });
+
+                            if (!res.ok) {
+                                alert('Failed to update title');
+                                return;
+                            }
+                            this.calendar.refetchEvents();
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        alert('An unexpected error occurred');
                     }
                 },
                 requestNotify(){

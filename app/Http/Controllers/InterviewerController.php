@@ -29,10 +29,35 @@ class InterviewerController extends Controller
 
         $today = Carbon::today();
         $todaySchedule = InterviewerAppointment::whereDate('start_at', $today)
-        ->where('interviewer_id', $user->id) ->with('taxpayer')
-        ->orderBy('start_at')->get()
-        ->map(function ($appointment) { return [ 'taxpayer' => $appointment->taxpayer->name ?? 'Unknown', 'time' => Carbon::parse($appointment->start_at)
-        ->format('g:i A'), 'status' => ucfirst($appointment->status), ]; });
+            ->where('interviewer_id', $user->id)
+            ->with('taxpayer')
+            ->orderBy('start_at')
+            ->get()
+            ->map(function ($appointment) {
+                return [
+                    'title' => $appointment->title,
+                    'taxpayer' => $appointment->taxpayer->name ?? 'Unknown',
+                    'time' => Carbon::parse($appointment->start_at)->format('g:i A'),
+                    'status' => ucfirst($appointment->status),
+                ];
+            });
+
+        // Get this month's schedule
+        $monthSchedule = InterviewerAppointment::whereBetween('start_at', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])
+            ->where('interviewer_id', $user->id)
+            ->with('taxpayer')
+            ->orderBy('start_at')
+            ->get()
+            ->map(function ($appointment) {
+                return [
+                    'id' => $appointment->id,
+                    'title' => $appointment->title,
+                    'taxpayer' => $appointment->taxpayer->name ?? 'Unknown',
+                    'date' => Carbon::parse($appointment->start_at)->format('M d, Y'),
+                    'time' => Carbon::parse($appointment->start_at)->format('g:i A'),
+                    'status' => ucfirst($appointment->status),
+                ];
+            });
 
         // Get recent uploads
         $recentUploads = request()->session()->get('recent_uploads', [
@@ -49,6 +74,7 @@ class InterviewerController extends Controller
             'todaySchedule' => $todaySchedule,
             'recentUploads' => $recentUploads,
             'taxpayers' => $taxpayers,
+            'monthSchedule' => $monthSchedule,
         ]);
     }
     public function taxpayer(User $user)

@@ -127,8 +127,9 @@
                                             </svg>
                                         </div>
                                         <div>
-                                            <p class="font-semibold text-gray-900 dark:text-gray-100">{{ $appointment['taxpayer'] }}</p>
-                                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $appointment['time'] }}</p>
+                                            <p class="font-semibold text-gray-900 dark:text-gray-100">{{ $appointment['title'] }}</p>
+                                            <p class="text-sm text-gray-600 dark:text-gray-300">{{ $appointment['taxpayer'] }}</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $appointment['time'] }}</p>
                                         </div>
                                     </div>
                                     <span class="px-3 py-1 text-xs font-semibold rounded-full
@@ -147,6 +148,48 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                             </svg>
                             <p>No appointments scheduled for today</p>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Monthly Schedule -->
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">This Month's Schedule</h3>
+                        @if(count($monthSchedule) > 0)
+                        <div class="max-h-96 overflow-y-auto space-y-3 pr-2">
+                            @foreach($monthSchedule as $appointment)
+                            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg mr-3">
+                                            <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold text-gray-900 dark:text-gray-100">{{ $appointment['title'] }}</p>
+                                            <p class="text-sm text-gray-600 dark:text-gray-300">{{ $appointment['taxpayer'] }}</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $appointment['date'] }} at {{ $appointment['time'] }}</p>
+                                        </div>
+                                    </div>
+                                    <span class="px-3 py-1 text-xs font-semibold rounded-full
+                                        @if($appointment['status'] === 'Confirmed') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                                        @else bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                        @endif">
+                                        {{ $appointment['status'] }}
+                                    </span>
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                        @else
+                        <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                            <svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <p>No appointments scheduled for this month</p>
                         </div>
                         @endif
                     </div>
