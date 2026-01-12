@@ -13,7 +13,7 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6" enctype="multipart/form-data">
         @csrf
         @method('patch')
 
@@ -29,10 +29,19 @@
             <x-input-error class="mt-2" :messages="$errors->get('phone')" />
         </div>
 
-        <div>
-            <x-input-label for="address" :value="__('Address')" />
-            <x-text-input id="address" name="address" type="text" class="mt-1 block w-full" :value="old('address', $user->address)" autocomplete="street-address" />
             <x-input-error class="mt-2" :messages="$errors->get('address')" />
+        </div>
+
+        <div>
+            <x-input-label for="tin" :value="__('Tax Identification Number (TIN)')" />
+            <x-text-input id="tin" name="tin" type="text" class="mt-1 block w-full" :value="old('tin', $user->tin)" />
+            <x-input-error class="mt-2" :messages="$errors->get('tin')" />
+        </div>
+
+        <div>
+            <x-input-label for="tin_document" :value="__('TIN Document (PDF/Image)')" />
+            <input id="tin_document" name="tin_document" type="file" class="mt-1 block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" />
+            <x-input-error class="mt-2" :messages="$errors->get('tin_document')" />
         </div>
 
         @if(auth()->user()->role === 'admin')

@@ -26,10 +26,37 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $validated = $request->validated();
+        $tinChanged = false;
+
+        if ($request->hasFile('tin_document')) {
+            $path = $request->file('tin_document')->store('tin_docs', 'public');
+            $validated['tin_document'] = $path;
+            $tinChanged = true;
+        }
+
+        if ($user->tin !== ($validated['tin'] ?? $user->tin)) {
+            $tinChanged = true;
+        }
+
+        $user->fill($validated);
 
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
+        }
+
+        // If TIN info changed and user is taxpayer, reset status and logout
+        if ($tinChanged && $user->role === 'taxpayer') {
+            $user->tin_status = 'pending';
+            $user->tin_verified_at = null;
+            $user->save();
+
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return Redirect::route('login')->with('status', 'Your TIN information has been updated. Please wait for admin verification.');
         }
 
         $request->user()->save();
